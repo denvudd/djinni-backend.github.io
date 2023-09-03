@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/dto/user.dto';
 import { hash } from 'bcrypt';
@@ -36,5 +40,17 @@ export class UserService {
         email,
       },
     });
+  }
+
+  async findUserById(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) throw new UnauthorizedException('This user is not exists.');
+
+    return user;
   }
 }

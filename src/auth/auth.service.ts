@@ -25,7 +25,7 @@ export class AuthService {
       success: true,
       user: validatedUser,
       accessToken: await this.jwtService.signAsync(payload, {
-        expiresIn: '1h',
+        expiresIn: '5h',
         secret: process.env.JWT_SECRET_KEY,
       }),
       refreshToken: await this.jwtService.signAsync(payload, {
