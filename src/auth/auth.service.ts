@@ -47,4 +47,22 @@ export class AuthService {
       throw new UnauthorizedException('Username or password are not correct.');
     }
   }
+
+  async refreshToken(user: any) {
+    const payload = {
+      username: user.username,
+      sub: user.sub,
+    };
+
+    return {
+      accessToken: await this.jwtService.signAsync(payload, {
+        expiresIn: '5h',
+        secret: process.env.JWT_SECRET_KEY,
+      }),
+      refreshToken: await this.jwtService.signAsync(payload, {
+        expiresIn: '30d',
+        secret: process.env.JWT_REFRESH_KEY,
+      }),
+    };
+  }
 }
