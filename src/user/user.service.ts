@@ -21,6 +21,7 @@ export class UserService {
         name: dto.name,
         email: dto.email,
         password: await hash(dto.password, 10),
+        role: dto.role,
       },
     });
 
