@@ -16,11 +16,150 @@ enum UserRole {
   Candidate
 }
 
-model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  name     String?
-  password String
+enum EnglishLevel {
+  NoEnglish
+  BeginnerElementary
+  PreIntermediate
+  Intermediate
+  UpperIntermediate
+  AdvancedFluent
+}
 
-  role     UserRole
+enum EmploymentOption {
+  Remote
+  Office
+  PartTime
+  Freelance
+  RelocateCity
+  RelocateCountry
+}
+
+enum CommunicateMethod {
+  Djinni
+  Email
+  Phone
+  Skype
+  WhatsApp
+  Telegram
+  LinkedIn
+}
+
+enum PreferableLanguage {
+  Ukrainian
+  English
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  fullname  String?
+  password  String
+  avatar    String?
+
+  role           UserRole
+  candidate_info CandidateUser[] @relation("CandidateToUser")
+  employer_info  EmployerUser[]  @relation("EmployerToUser")
+}
+
+model CandidateUser {
+  id String @id @default(uuid())
+
+  userId String
+  user   User[] @relation("CandidateToUser")
+
+  category          String?
+  experience        Decimal?
+  expectations      Decimal             @default(1500)
+  hourlyRate        Decimal?
+  position          String?
+  english           EnglishLevel        @default(NoEnglish)
+  country           String              @default("Ukraine")
+  employmentOptions EmploymentOption    @default(Remote)
+  experienceDescr   String?
+  expectationsDescr String?
+  achievementsDescr String?
+  employerQuestions String?
+  preferableLang    PreferableLanguage?
+  communicateMethod CommunicateMethod   @default(Djinni)
+
+  contactLinks   UserCandidateLinks[] @relation("LinksToCandidate")
+  blockedDomains BlockedDomain[]      @relation("BlockedDomainToCandidate")
+  blockedTypes   BlockedVacancyType[] @relation("BlockedVacancyTypeToCandidate")
+  skills         CandidateSkill[]     @relation("SkillToCandidate")
+}
+
+model BlockedDomain {
+  id   String @id @default(uuid())
+  name String
+
+  candidateId String?
+  candidate   CandidateUser? @relation("BlockedDomainToCandidate", fields: [candidateId], references: [id])
+
+  @@index([candidateId])
+}
+
+model BlockedVacancyType {
+  id   String @id @default(uuid())
+  name String
+
+  candidateId String?
+  candidate   CandidateUser? @relation("BlockedVacancyTypeToCandidate", fields: [candidateId], references: [id])
+
+  @@index([candidateId])
+}
+
+model CandidateSkill {
+  id       String  @id @default(uuid())
+  name     String
+  category String?
+
+  candidateId String?
+  candidate   CandidateUser? @relation("SkillToCandidate", fields: [candidateId], references: [id])
+
+  @@index([candidateId])
+}
+
+model EmployerUser {
+  id String @id @default(uuid())
+
+  userId String
+  user   User[] @relation("EmployerToUser")
+
+  positionAndCompany String?
+  telegram           String?
+  phone              String?
+  aboutCompany       String?
+
+  contactLinks UserEmployerLinks[] @relation("LinksToEmployer")
+}
+
+model UserCandidateLinks {
+  id         String  @id @default(uuid())
+  skype      String?
+  phone      String?
+  telegram   String?
+  whatsApp   String?
+  linkedIn   String?
+  github     String?
+  portfolio  String?
+  resumeFile String?
+
+  candidateId String?
+  candidate   CandidateUser? @relation("LinksToCandidate", fields: [candidateId], references: [id])
+
+  @@index([candidateId])
+}
+
+model UserEmployerLinks {
+  id       String  @id @default(uuid())
+  linkedIn String?
+  company  String?
+  dou      String?
+
+  employerId String?
+  employer   EmployerUser? @relation("LinksToEmployer", fields: [employerId], references: [id])
+
+  @@index([employerId])
 }

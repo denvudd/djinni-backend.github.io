@@ -7,7 +7,7 @@ enum UserRole {
 
 export class CreateUserDto {
   @IsString()
-  name: string;
+  fullname: string;
 
   @IsEmail(undefined, { message: 'Invalid email format' })
   email: string;

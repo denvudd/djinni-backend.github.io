@@ -17,7 +17,7 @@ export class AuthService {
     const payload = {
       username: validatedUser.email,
       sub: {
-        name: validatedUser.name,
+        name: validatedUser.fullname,
       },
     };
 
