@@ -112,7 +112,7 @@ model BlockedVacancyType {
 
 model CandidateSkill {
   id       String  @id @default(uuid())
-  name     String
+  name     String  @unique
   category String?
 
   candidateId String?

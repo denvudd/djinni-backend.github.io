@@ -7,10 +7,13 @@ import {
 import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/dto/user.dto';
 import { hash } from 'bcrypt';
-import { CandidateUpdateDto } from './dto/dto/candidate.dto';
+import { CandidateService } from 'src/candidate/candidate.service';
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private candidateService: CandidateService,
+  ) {}
 
   async create(dto: CreateUserDto) {
     const user = await this.prisma.user.findUnique({
@@ -33,7 +36,7 @@ export class UserService {
     });
 
     if (dto.role === 'Candidate') {
-      await this.prisma.candidateUser.create({
+      const candidate = await this.prisma.candidateUser.create({
         data: {
           userId: newUser.id,
           user: {
@@ -48,6 +51,19 @@ export class UserService {
           preferableLang: 'Ukrainian',
         },
       });
+
+      await this.prisma.userCandidateLinks.create({
+        data: {
+          candidateId: candidate.id,
+        },
+      });
+
+      const { password, ...result } = newUser;
+
+      return {
+        ...result,
+        candidateId: candidate.id,
+      };
     } else {
       await this.prisma.employerUser.create({
         data: {
@@ -55,34 +71,6 @@ export class UserService {
         },
       });
     }
-
-    const { password, ...result } = newUser;
-
-    return result;
-  }
-
-  async updateCandidate(id: string, dto: CandidateUpdateDto) {
-    const candidate = await this.prisma.candidateUser.findFirst({
-      where: {
-        id,
-      },
-    });
-
-    if (!candidate) throw new NotFoundException();
-
-    const result = await this.prisma.candidateUser.update({
-      where: {
-        id,
-      },
-      data: {
-        ...dto,
-      },
-    });
-
-    return {
-      success: true,
-      ...result,
-    };
   }
 
   async findUserByEmail(email: string) {
@@ -98,31 +86,37 @@ export class UserService {
       where: {
         id,
       },
+      include: {
+        candidate_info: {
+          select: {
+            id: true,
+          },
+        },
+        employer_info: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
+
+    if (!user) throw new NotFoundException('This user is not exist');
 
     if (user.role === 'Candidate') {
-      return await this.findCandidateById(user.id);
+      const { candidate_info, password, employer_info, ...result } = user;
+
+      return {
+        ...result,
+        candidate_id: candidate_info[0].id,
+      };
     } else {
-      return await this.findEmployerById(user.id);
+      const { employer_info, password, candidate_info, ...result } = user;
+
+      return {
+        ...result,
+        employer_id: employer_info[0].id,
+      };
     }
-  }
-
-  async findCandidateById(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id,
-        role: 'Candidate',
-      },
-      include: {
-        candidate_info: true,
-      },
-    });
-
-    if (!user) throw new UnauthorizedException('This user is not exists.');
-
-    const { password, ...result } = user;
-
-    return result;
   }
 
   async findEmployerById(id: string) {
