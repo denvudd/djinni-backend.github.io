@@ -52,12 +52,6 @@ export class UserService {
         },
       });
 
-      await this.prisma.userCandidateLinks.create({
-        data: {
-          candidateId: candidate.id,
-        },
-      });
-
       const { password, ...result } = newUser;
 
       return {

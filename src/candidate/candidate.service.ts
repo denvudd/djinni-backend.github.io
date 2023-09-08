@@ -39,38 +39,6 @@ export class CandidateService {
     });
   }
 
-  async getContacts(candidateId: string) {
-    return await this.prisma.userCandidateLinks.findMany({
-      where: {
-        candidateId,
-      },
-    });
-  }
-
-  async updateContacts(candidateId: string, dto: UpdateContactsDto) {
-    const { contactsId, ...payload } = dto;
-
-    const candidateExist = await this.prisma.userCandidateLinks.findFirst({
-      where: {
-        id: dto.contactsId,
-        candidateId,
-      },
-    });
-
-    if (!candidateExist)
-      throw new NotFoundException('This contacts information does not exist');
-
-    return await this.prisma.userCandidateLinks.update({
-      where: {
-        id: dto.contactsId,
-        candidateId,
-      },
-      data: {
-        ...payload,
-      },
-    });
-  }
-
   async addSkill(candidateId: string, dto: SkillCreateDto) {
     const skillExist = await this.prisma.candidateSkill.findFirst({
       where: {

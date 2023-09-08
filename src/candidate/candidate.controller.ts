@@ -38,20 +38,6 @@ export class CandidateController {
   }
 
   @UseGuards(JwtGuard)
-  @Patch(':id/contacts')
-  updateContacts(
-    @Param('id') id: string,
-    @Body() updateContactsDto: UpdateContactsDto,
-  ) {
-    return this.candidateService.updateContacts(id, updateContactsDto);
-  }
-
-  @Get(':id/contacts')
-  getCandidateContacts(@Param('id') id: string) {
-    return this.candidateService.getContacts(id);
-  }
-
-  @UseGuards(JwtGuard)
   @Patch(':id')
   update(
     @Param('id') id: string,
