@@ -6,14 +6,6 @@ import { PrismaService } from 'src/prisma.service';
 export class SkillService {
   constructor(private prisma: PrismaService) {}
   async create(candidateId: string, dto: CreateSkillDto) {
-    const skillExist = await this.prisma.candidateSkill.findFirst({
-      where: {
-        name: dto.name,
-      },
-    });
-
-    if (skillExist) throw new ConflictException('This skill already exist');
-
     const skill = await this.prisma.candidateSkill.create({
       data: {
         name: dto.name,

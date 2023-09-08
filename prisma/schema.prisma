@@ -75,7 +75,7 @@ model CandidateUser {
   hourlyRate        Decimal?
   position          String?
   english           EnglishLevel        @default(NoEnglish)
-  country           String              @default("Ukraine")
+  country           String              @default("Україна")
   employmentOptions EmploymentOption    @default(Remote)
   experienceDescr   String?
   expectationsDescr String?
@@ -112,7 +112,7 @@ model BlockedVacancyType {
 
 model CandidateSkill {
   id       String  @id @default(uuid())
-  name     String  @unique
+  name     String  
   category String?
 
   candidateId String?

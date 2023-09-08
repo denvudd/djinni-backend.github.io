@@ -42,9 +42,11 @@ export class CandidateUpdateDto {
   @IsString()
   category: string;
 
+  @IsOptional()
   @IsDecimal()
   experience: number;
 
+  @IsOptional()
   @IsDecimal()
   expectations: number;
 
@@ -76,15 +78,19 @@ export class CandidateUpdateDto {
   @IsString()
   employerQuestions: string;
 
+  @IsOptional()
   @IsEnum(EmploymentOption, { message: 'Invalid employment option' })
   employmentOptions: EmploymentOption;
 
+  @IsOptional()
   @IsEnum(PreferableLanguage, { message: 'Invalid preferable language option' })
   preferableLang: PreferableLanguage;
 
+  @IsOptional()
   @IsEnum(CommunicateMethod, { message: 'Invalid communicate method option' })
   communicateMethod: CommunicateMethod;
 
+  @IsOptional()
   @IsEnum(EnglishLevel, { message: 'Invalid english level method option' })
   english: EnglishLevel;
 }
