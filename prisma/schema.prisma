@@ -130,8 +130,8 @@ model Vacancy {
   country           String           @default("Україна")
   city              String?
   isRelocate        Boolean          @default(false)
-  salaryGte         Decimal
-  salaryLte         Decimal
+  salaryFork        Decimal
+  privateSalaryFork Decimal?
   experience        Decimal          @default(0)
   english           EnglishLevel     @default(NoEnglish)
   companyType       CompanyType      @default(None)

@@ -1,37 +1,10 @@
 import { IsString, IsEnum, IsDecimal, IsOptional } from 'class-validator';
-
-export enum EmploymentOption {
-  Remote = 'Remote',
-  Office = 'Office',
-  PartTime = 'PartTime',
-  Freelance = 'Freelance',
-  RelocateCity = 'RelocateCity',
-  RelocateCountry = 'RelocateCountry',
-}
-
-enum PreferableLanguage {
-  Ukrainian = 'Ukrainian',
-  English = 'English',
-}
-
-enum CommunicateMethod {
-  Djinni = 'Djinni',
-  Email = 'Email',
-  Phone = 'Phone',
-  Skype = 'Skype',
-  WhatsApp = 'WhatsApp',
-  Telegram = 'Telegram',
-  LinkedIn = 'LinkedIn',
-}
-
-export enum EnglishLevel {
-  NoEnglish = 'NoEnglish',
-  BeginnerElementary = 'BeginnerElementary',
-  PreIntermediate = 'PreIntermediate',
-  Intermediate = 'Intermediate',
-  UpperIntermediate = 'UpperIntermediate',
-  AdvancedFluent = 'AdvancedFluent',
-}
+import {
+  CommunicateMethod,
+  EmploymentOption,
+  EnglishLevel,
+  PreferableLanguage,
+} from 'src/enums/candidate.enum';
 
 export class CandidateUpdateDto {
   @IsOptional()

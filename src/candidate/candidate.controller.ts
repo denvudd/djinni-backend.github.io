@@ -13,8 +13,7 @@ import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { OfferService } from 'src/offer/offer.service';
 import { SkillCreateDto } from './dto/create-skill.dto';
-import { EnglishLevel } from '@prisma/client';
-import { QueryDto } from './validators/candidates-list.validator';
+import { CadidatesListQueryDto } from './dto/candidates-list.dto';
 @Controller('candidate')
 export class CandidateController {
   constructor(
@@ -23,7 +22,7 @@ export class CandidateController {
   ) {}
 
   @Get('list')
-  findAll(@Query() queryParams: QueryDto) {
+  findAll(@Query() queryParams: CadidatesListQueryDto) {
     return this.candidateService.getListOfCandidates(queryParams);
   }
 

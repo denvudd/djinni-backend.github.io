@@ -174,7 +174,7 @@ export class OfferService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} offer`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} offer`;
+  // }
 }

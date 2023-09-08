@@ -7,14 +7,14 @@ import {
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { PrismaService } from 'src/prisma.service';
 import { SkillCreateDto } from './dto/create-skill.dto';
-import { QueryDto } from './validators/candidates-list.validator';
+import { CadidatesListQueryDto } from './dto/candidates-list.dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CandidateService {
   constructor(private prisma: PrismaService) {}
 
-  async getListOfCandidates(queryParams: QueryDto) {
+  async getListOfCandidates(queryParams: CadidatesListQueryDto) {
     const {
       page,
       limit,

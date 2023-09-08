@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import { PrismaService } from 'src/prisma.service';
+import { VacanciesListQueryDto } from './dto/vacancies-list.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class VacancyService {
@@ -57,19 +59,86 @@ export class VacancyService {
     return vacancy;
   }
 
-  findAll() {
-    return this.prismaService.vacancy.findMany();
+  async getListOfVacancies(queryParams: VacanciesListQueryDto) {
+    const {
+      page,
+      limit,
+      exp_from,
+      exp_to,
+      salary_min,
+      salary_max,
+      title,
+      keywords,
+      english_level,
+      employment_options,
+    } = queryParams;
+
+    const filter: Prisma.VacancyWhereInput = {
+      experience: {
+        gte: exp_from,
+        lte: exp_to,
+      },
+      salaryFork: {
+        gte: salary_min,
+        lte: salary_max,
+      },
+    };
+
+    if (title) {
+      filter.category = title;
+    }
+
+    if (keywords) {
+      filter.OR = [
+        { name: { contains: keywords } },
+        { description: { contains: keywords } },
+      ];
+    }
+
+    if (english_level) {
+      filter.english = english_level;
+    }
+
+    if (employment_options) {
+      filter.employmentOptions = employment_options;
+    }
+
+    console.log(filter);
+
+    return this.prismaService.vacancy.findMany({
+      where: filter,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} vacancy`;
+  async findOneById(id: string) {
+    return await this.prismaService.vacancy.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        keywords: true,
+        clarifiedData: true,
+      },
+    });
   }
 
-  update(id: number, updateVacancyDto: UpdateVacancyDto) {
-    return `This action updates a #${id} vacancy`;
+  async update(id: string, updateVacancyDto: UpdateVacancyDto) {
+    const { employerId, clarifiedData, keywords, ...restDto } =
+      updateVacancyDto;
+
+    return await this.prismaService.vacancy.update({
+      where: {
+        id,
+      },
+      data: {
+        ...restDto,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} vacancy`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} vacancy`;
+  // }
 }

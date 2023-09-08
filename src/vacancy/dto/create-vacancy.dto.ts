@@ -72,10 +72,11 @@ export class CreateVacancyDto {
   isRelocate: boolean;
 
   @IsDecimal()
-  salaryGte: number;
+  salaryFork: number;
 
+  @IsOptional()
   @IsDecimal()
-  salaryLte: number;
+  privateSalaryFork: number;
 
   @IsDecimal()
   experience: number;

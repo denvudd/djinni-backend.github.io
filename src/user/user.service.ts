@@ -10,10 +10,7 @@ import { hash } from 'bcrypt';
 import { CandidateService } from 'src/candidate/candidate.service';
 @Injectable()
 export class UserService {
-  constructor(
-    private prisma: PrismaService,
-    private candidateService: CandidateService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateUserDto) {
     const user = await this.prisma.user.findUnique({
@@ -134,23 +131,5 @@ export class UserService {
         employer_id: employer_info[0].id,
       };
     }
-  }
-
-  async findEmployerById(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id,
-        role: 'Employer',
-      },
-      include: {
-        employer_info: true,
-      },
-    });
-
-    if (!user) throw new UnauthorizedException('This user is not exists.');
-
-    const { password, ...result } = user;
-
-    return result;
   }
 }
