@@ -42,6 +42,14 @@ export class VacancyService {
             id: true,
             positionAndCompany: true,
             companyLink: true,
+            linkedIn: true,
+            telegram: true,
+            user: {
+              select: {
+                email: true,
+                avatar: true,
+              },
+            },
           },
         },
       },

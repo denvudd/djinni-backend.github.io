@@ -12,7 +12,7 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   email     String   @unique
@@ -22,10 +22,11 @@ model User {
   role           UserRole
   candidate_info CandidateUser[] @relation("CandidateToUser")
   employer_info  EmployerUser[]  @relation("EmployerToUser")
+  ReplyOnOffer   ReplyOnOffer[]
 }
 
 model CandidateUser {
-  id String @id @default(uuid())
+  id String @id @default(cuid())
 
   userId String
   user   User[] @relation("CandidateToUser")
@@ -62,10 +63,11 @@ model CandidateUser {
   blockedDomains BlockedDomain[]      @relation("BlockedDomainToCandidate")
   blockedTypes   BlockedVacancyType[] @relation("BlockedVacancyTypeToCandidate")
   skills         CandidateSkill[]     @relation("SkillToCandidate")
+  Offer          Offer[]
 }
 
 model BlockedDomain {
-  id   String @id @default(uuid())
+  id   String @id @default(cuid())
   name String
 
   candidateId String?
@@ -75,7 +77,7 @@ model BlockedDomain {
 }
 
 model BlockedVacancyType {
-  id   String @id @default(uuid())
+  id   String @id @default(cuid())
   name String
 
   candidateId String?
@@ -85,7 +87,7 @@ model BlockedVacancyType {
 }
 
 model CandidateSkill {
-  id       String  @id @default(uuid())
+  id       String  @id @default(cuid())
   name     String
   category String?
 
@@ -96,12 +98,13 @@ model CandidateSkill {
 }
 
 model EmployerUser {
-  id String @id @default(uuid())
+  id String @id @default(cuid())
 
   userId String
   user   User[] @relation("EmployerToUser")
 
   fullname           String?
+  companyName        String?
   positionAndCompany String?
   telegram           String?
   linkedIn           String?
@@ -111,10 +114,11 @@ model EmployerUser {
   aboutCompany       String?
 
   vacancies Vacancy[]
+  offers    Offer[]
 }
 
 model Vacancy {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -138,11 +142,53 @@ model Vacancy {
   employerId String
   employer   EmployerUser @relation(fields: [employerId], references: [id], onDelete: Cascade)
 
+  offers Offer[]
+
   @@index([employerId])
 }
 
+model Offer {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  coverLetter String
+
+  vacancyId   String
+  vacancy     Vacancy        @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  employerId  String
+  employer    EmployerUser   @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  candidateId String
+  candidate   CandidateUser  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  replies     ReplyOnOffer[]
+
+  @@index([vacancyId])
+  @@index([employerId])
+  @@index([candidateId])
+}
+
+model ReplyOnOffer {
+  id        String   @id @default(nanoid(2))
+  createdAt DateTime @default(now())
+  updatetAt DateTime @updatedAt
+
+  text     String @db.Text
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+  offerId  String
+  offer    Offer  @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  replyToId String?
+  replyTo   ReplyOnOffer?  @relation("ReplyTo", fields: [replyToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   ReplyOnOffer[] @relation("ReplyTo")
+
+  @@index([offerId])
+  @@index([authorId])
+  @@index([replyToId])
+}
+
 model VacancyKeyword {
-  id   String @id @default(uuid())
+  id   String @id @default(cuid())
   name String
 
   vacancyId String
@@ -152,17 +198,13 @@ model VacancyKeyword {
 }
 
 model ClarifiedData {
-  id   String            @id @default(uuid())
+  id   String            @id @default(cuid())
   name ClarifiedDataEnum @default(None)
 
   vacancyId String
   vacancy   Vacancy @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
 
   @@index([vacancyId])
-}
-
-model Offer {
-  id String @id @default(uuid())
 }
 
 // ENUMS 

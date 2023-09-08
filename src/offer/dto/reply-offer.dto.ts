@@ -1,10 +1,13 @@
 import { IsOptional, IsString } from 'class-validator';
 
-export class CreateSkillDto {
+export class ReplyOfferDto {
   @IsString()
-  name: string;
+  text: string;
+
+  @IsString()
+  authorId: string;
 
   @IsOptional()
   @IsString()
-  category: string;
+  replyToId: string;
 }

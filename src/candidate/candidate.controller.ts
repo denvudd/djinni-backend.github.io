@@ -10,13 +10,13 @@ import {
 import { CandidateService } from './candidate.service';
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
-import { CreateSkillDto } from 'src/skill/dto/create-skill.dto';
-import { SkillService } from 'src/skill/skill.service';
+import { OfferService } from 'src/offer/offer.service';
+import { SkillCreateDto } from './dto/create-skill.dto';
 @Controller('candidate')
 export class CandidateController {
   constructor(
     private readonly candidateService: CandidateService,
-    private readonly skillService: SkillService,
+    private readonly offerService: OfferService,
   ) {}
 
   @Get(':id')
@@ -24,6 +24,7 @@ export class CandidateController {
     return this.candidateService.findOneById(id);
   }
 
+  @UseGuards(JwtGuard)
   @Get(':id/skills')
   getCandidateSkills(@Param('id') id: string) {
     return this.candidateService.getSkills(id);
@@ -31,8 +32,14 @@ export class CandidateController {
 
   @UseGuards(JwtGuard)
   @Post(':id/skills')
-  addSkill(@Param('id') id: string, @Body() createSkillDto: CreateSkillDto) {
-    return this.skillService.create(id, createSkillDto);
+  addSkill(@Param('id') id: string, @Body() createSkillDto: SkillCreateDto) {
+    return this.candidateService.addSkill(id, createSkillDto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Get(':id/offers')
+  getOffers(@Param('id') id: string) {
+    return this.offerService.getOffersByCandidateId(id);
   }
 
   @UseGuards(JwtGuard)
