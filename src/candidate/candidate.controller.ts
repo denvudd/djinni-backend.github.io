@@ -6,18 +6,26 @@ import {
   Patch,
   Param,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { CandidateService } from './candidate.service';
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { OfferService } from 'src/offer/offer.service';
 import { SkillCreateDto } from './dto/create-skill.dto';
+import { EnglishLevel } from '@prisma/client';
+import { QueryDto } from './validators/candidates-list.validator';
 @Controller('candidate')
 export class CandidateController {
   constructor(
     private readonly candidateService: CandidateService,
     private readonly offerService: OfferService,
   ) {}
+
+  @Get('list')
+  findAll(@Query() queryParams: QueryDto) {
+    return this.candidateService.getListOfCandidates(queryParams);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

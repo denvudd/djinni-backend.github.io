@@ -7,10 +7,65 @@ import {
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { PrismaService } from 'src/prisma.service';
 import { SkillCreateDto } from './dto/create-skill.dto';
+import { QueryDto } from './validators/candidates-list.validator';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CandidateService {
   constructor(private prisma: PrismaService) {}
+
+  async getListOfCandidates(queryParams: QueryDto) {
+    const {
+      page,
+      limit,
+      exp_from,
+      exp_to,
+      salary_min,
+      salary_max,
+      title,
+      keywords,
+      english_level,
+      employment_options,
+    } = queryParams;
+
+    const filter: Prisma.CandidateUserWhereInput = {
+      experience: {
+        gte: exp_from,
+        lte: exp_to,
+      },
+      expectations: {
+        gte: salary_min,
+        lte: salary_max,
+      },
+    };
+
+    if (title) {
+      filter.category = title;
+    }
+
+    if (keywords) {
+      filter.OR = [
+        { position: { contains: keywords } },
+        { experienceDescr: { contains: keywords } },
+        { expectationsDescr: { contains: keywords } },
+        { achievementsDescr: { contains: keywords } },
+      ];
+    }
+
+    if (english_level) {
+      filter.english = english_level;
+    }
+
+    if (employment_options) {
+      filter.employmentOptions = employment_options;
+    }
+
+    return this.prisma.candidateUser.findMany({
+      where: filter,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+  }
 
   async findOneById(id: string) {
     const candidate = await this.prisma.candidateUser.findUnique({

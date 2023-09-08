@@ -1,6 +1,6 @@
 import { IsString, IsEnum, IsDecimal, IsOptional } from 'class-validator';
 
-enum EmploymentOption {
+export enum EmploymentOption {
   Remote = 'Remote',
   Office = 'Office',
   PartTime = 'PartTime',
@@ -24,7 +24,7 @@ enum CommunicateMethod {
   LinkedIn = 'LinkedIn',
 }
 
-enum EnglishLevel {
+export enum EnglishLevel {
   NoEnglish = 'NoEnglish',
   BeginnerElementary = 'BeginnerElementary',
   PreIntermediate = 'PreIntermediate',
