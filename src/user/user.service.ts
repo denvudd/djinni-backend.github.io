@@ -28,7 +28,6 @@ export class UserService {
 
     const newUser = await this.prisma.user.create({
       data: {
-        fullname: dto.fullname,
         email: dto.email,
         password: await hash(dto.password, 10),
         role: dto.role,
@@ -59,11 +58,23 @@ export class UserService {
         candidateId: candidate.id,
       };
     } else {
-      await this.prisma.employerUser.create({
+      const employer = await this.prisma.employerUser.create({
         data: {
           userId: newUser.id,
+          user: {
+            connect: {
+              id: newUser.id,
+            },
+          },
         },
       });
+
+      const { password, ...result } = newUser;
+
+      return {
+        ...result,
+        employerId: employer.id,
+      };
     }
   }
 
@@ -71,6 +82,18 @@ export class UserService {
     return await this.prisma.user.findUnique({
       where: {
         email,
+      },
+      include: {
+        candidate_info: {
+          select: {
+            id: true,
+          },
+        },
+        employer_info: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
   }

@@ -12,8 +12,6 @@ import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { CreateSkillDto } from 'src/skill/dto/create-skill.dto';
 import { SkillService } from 'src/skill/skill.service';
-import { UpdateContactsDto } from './dto/update-contacts.dto';
-
 @Controller('candidate')
 export class CandidateController {
   constructor(

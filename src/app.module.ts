@@ -8,9 +8,10 @@ import { PrismaService } from './prisma.service';
 import { CandidateModule } from './candidate/candidate.module';
 import { SkillModule } from './skill/skill.module';
 import { CategoryModule } from './category/category.module';
+import { VacancyModule } from './vacancy/vacancy.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), UserModule, AuthModule, CandidateModule, SkillModule, CategoryModule],
+  imports: [ConfigModule.forRoot(), UserModule, AuthModule, CandidateModule, SkillModule, CategoryModule, VacancyModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

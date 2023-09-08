@@ -7,7 +7,6 @@ import {
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { PrismaService } from 'src/prisma.service';
 import { SkillCreateDto } from './dto/create-skill.dto';
-import { UpdateContactsDto } from './dto/update-contacts.dto';
 
 @Injectable()
 export class CandidateService {

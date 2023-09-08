@@ -16,9 +16,6 @@ export class AuthService {
 
     const payload = {
       username: validatedUser.email,
-      sub: {
-        name: validatedUser.fullname,
-      },
     };
 
     return {
@@ -40,9 +37,21 @@ export class AuthService {
     const passwordCompare = await compare(dto.password, user.password);
 
     if (user && passwordCompare) {
-      const { password, ...result } = user;
+      const { password, employer_info, candidate_info, ...result } = user;
 
-      return result;
+      if (!!candidate_info.length) {
+        return {
+          success: true,
+          ...result,
+          candidate_id: candidate_info[0].id,
+        };
+      } else {
+        return {
+          success: true,
+          ...result,
+          employer_id: employer_info[0].id,
+        };
+      }
     } else {
       throw new UnauthorizedException('Username or password are not correct.');
     }
@@ -51,7 +60,6 @@ export class AuthService {
   async refreshToken(user: any) {
     const payload = {
       username: user.username,
-      sub: user.sub,
     };
 
     return {

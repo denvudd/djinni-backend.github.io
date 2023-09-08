@@ -16,7 +16,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   email     String   @unique
-  fullname  String?
   password  String
   avatar    String?
 
@@ -31,6 +30,7 @@ model CandidateUser {
   userId String
   user   User[] @relation("CandidateToUser")
 
+  fullname     String?
   expectations Decimal @default(1500)
   country      String  @default("Україна")
   city         String  @default("Київ")
@@ -101,6 +101,7 @@ model EmployerUser {
   userId String
   user   User[] @relation("EmployerToUser")
 
+  fullname           String?
   positionAndCompany String?
   telegram           String?
   linkedIn           String?
@@ -123,7 +124,7 @@ model Vacancy {
   category          String
   employmentOptions EmploymentOption @default(Remote)
   country           String           @default("Україна")
-  city              String
+  city              String?
   isRelocate        Boolean          @default(false)
   salaryGte         Decimal
   salaryLte         Decimal
@@ -132,11 +133,22 @@ model Vacancy {
   companyType       CompanyType      @default(None)
   clarifiedData     ClarifiedData[]
   youtube           String?
+  keywords          VacancyKeyword[]
 
   employerId String
   employer   EmployerUser @relation(fields: [employerId], references: [id], onDelete: Cascade)
 
   @@index([employerId])
+}
+
+model VacancyKeyword {
+  id   String @id @default(uuid())
+  name String
+
+  vacancyId String
+  vacancy   Vacancy @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+
+  @@index([vacancyId])
 }
 
 model ClarifiedData {
