@@ -1,13 +1,11 @@
 import {
   Injectable,
   ConflictException,
-  UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/dto/user.dto';
 import { hash } from 'bcrypt';
-import { CandidateService } from 'src/candidate/candidate.service';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
@@ -84,11 +82,13 @@ export class UserService {
         candidate_info: {
           select: {
             id: true,
+            fullname: true,
           },
         },
         employer_info: {
           select: {
             id: true,
+            fullname: true,
           },
         },
       },

@@ -4,6 +4,7 @@ import { UserService } from 'src/user/user.service';
 import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
+const EXPIRE_TIME = 20 * 1000; // ~5 hours
 @Injectable()
 export class AuthService {
   constructor(
@@ -22,21 +23,26 @@ export class AuthService {
       success: true,
       user: validatedUser,
       accessToken: await this.jwtService.signAsync(payload, {
-        expiresIn: '5h',
+        expiresIn: '1d',
         secret: process.env.JWT_SECRET_KEY,
       }),
       refreshToken: await this.jwtService.signAsync(payload, {
         expiresIn: '30d',
         secret: process.env.JWT_REFRESH_KEY,
       }),
+      expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
     };
   }
 
   async validateUser(dto: LoginDto) {
     const user = await this.userService.findUserByEmail(dto.username);
+
+    if (!user)
+      throw new UnauthorizedException('Username or password are not correct.');
+
     const passwordCompare = await compare(dto.password, user.password);
 
-    if (user && passwordCompare) {
+    if (passwordCompare) {
       const { password, employer_info, candidate_info, ...result } = user;
 
       if (!!candidate_info.length) {
@@ -44,12 +50,14 @@ export class AuthService {
           success: true,
           ...result,
           candidate_id: candidate_info[0].id,
+          fullname: candidate_info[0].fullname,
         };
       } else {
         return {
           success: true,
           ...result,
           employer_id: employer_info[0].id,
+          fullname: employer_info[0].fullname,
         };
       }
     } else {
@@ -71,6 +79,7 @@ export class AuthService {
         expiresIn: '30d',
         secret: process.env.JWT_REFRESH_KEY,
       }),
+      expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
     };
   }
 }

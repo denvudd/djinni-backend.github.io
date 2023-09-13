@@ -10,6 +10,7 @@ import { CategoryModule } from './category/category.module';
 import { VacancyModule } from './vacancy/vacancy.module';
 import { OfferModule } from './offer/offer.module';
 import { EmployerModule } from './employer/employer.module';
+import { CountriesModule } from './countries/countries.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { EmployerModule } from './employer/employer.module';
     VacancyModule,
     OfferModule,
     EmployerModule,
+    CountriesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

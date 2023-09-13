@@ -7,6 +7,7 @@ import {
   Param,
   UseGuards,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { CandidateService } from './candidate.service';
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
@@ -41,6 +42,12 @@ export class CandidateController {
   @Post(':id/skills')
   addSkill(@Param('id') id: string, @Body() createSkillDto: SkillCreateDto) {
     return this.candidateService.addSkill(id, createSkillDto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete(':id/skills/:skillId')
+  deleteSkill(@Param('id') id: string, @Param('skillId') skillId: string) {
+    return this.candidateService.deleteSkill(id, skillId);
   }
 
   @UseGuards(JwtGuard)

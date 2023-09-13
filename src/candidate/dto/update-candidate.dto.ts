@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsDecimal, IsOptional } from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsNumber } from 'class-validator';
 import {
   CommunicateMethod,
   EmploymentOption,
@@ -16,15 +16,15 @@ export class CandidateUpdateDto {
   category: string;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   experience: number;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   expectations: number;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   hourlyRate: number;
 
   @IsOptional()
@@ -34,6 +34,10 @@ export class CandidateUpdateDto {
   @IsOptional()
   @IsString()
   country: string;
+
+  @IsOptional()
+  @IsString()
+  city: string;
 
   @IsOptional()
   @IsString()

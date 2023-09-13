@@ -96,6 +96,7 @@ export class CandidateService {
   async addSkill(candidateId: string, dto: SkillCreateDto) {
     const skillExist = await this.prisma.candidateSkill.findFirst({
       where: {
+        candidateId,
         name: dto.name,
       },
     });
@@ -117,22 +118,25 @@ export class CandidateService {
     return skill;
   }
 
-  async deleteSkill(id: string, dto: SkillCreateDto) {
+  async deleteSkill(id: string, skillId: string) {
     const skillExist = await this.prisma.candidateSkill.findFirst({
       where: {
-        name: dto.name,
+        id: skillId,
       },
     });
 
     if (!skillExist) throw new ConflictException('This skill does not exist');
 
-    const skill = await this.prisma.candidateSkill.delete({
+    const skill = await this.prisma.candidateSkill.deleteMany({
       where: {
-        id,
+        id: skillId,
       },
     });
 
-    return skill;
+    return {
+      success: true,
+      ...skill,
+    };
   }
 
   async update(id: string, dto: CandidateUpdateDto) {

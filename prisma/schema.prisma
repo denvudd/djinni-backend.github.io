@@ -32,19 +32,19 @@ model CandidateUser {
   user   User[] @relation("CandidateToUser")
 
   fullname     String?
-  expectations Decimal @default(1500)
+  expectations Int     @default(1500)
   country      String  @default("Україна")
   city         String  @default("Київ")
   isRelocate   Boolean @default(false)
-  experience   Decimal @default(0)
+  experience   Int     @default(0)
 
   category          String?
-  hourlyRate        Decimal?
+  hourlyRate        Int?
   position          String?
-  experienceDescr   String?
-  expectationsDescr String?
-  achievementsDescr String?
-  employerQuestions String?
+  experienceDescr   String? @db.VarChar(1500)
+  expectationsDescr String? @db.VarChar(1500)
+  achievementsDescr String? @db.VarChar(1500)
+  employerQuestions String? @db.VarChar(800)
 
   preferableLang    PreferableLanguage?
   english           EnglishLevel        @default(NoEnglish)
