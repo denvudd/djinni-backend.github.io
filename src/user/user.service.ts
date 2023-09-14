@@ -43,6 +43,7 @@ export class UserService {
           employmentOptions: 'Remote',
           communicateMethod: 'Djinni',
           preferableLang: 'Ukrainian',
+          filled: false,
         },
       });
 
@@ -83,12 +84,14 @@ export class UserService {
           select: {
             id: true,
             fullname: true,
+            filled: true,
           },
         },
         employer_info: {
           select: {
             id: true,
             fullname: true,
+            filled: true,
           },
         },
       },
@@ -104,11 +107,13 @@ export class UserService {
         candidate_info: {
           select: {
             id: true,
+            filled: true,
           },
         },
         employer_info: {
           select: {
             id: true,
+            filled: true,
           },
         },
       },
@@ -122,6 +127,7 @@ export class UserService {
       return {
         ...result,
         candidate_id: candidate_info[0].id,
+        filled: user.candidate_info[0].filled,
       };
     } else {
       const { employer_info, password, candidate_info, ...result } = user;
@@ -129,6 +135,7 @@ export class UserService {
       return {
         ...result,
         employer_id: employer_info[0].id,
+        filled: user.employer_info[0].filled,
       };
     }
   }

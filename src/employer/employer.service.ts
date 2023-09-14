@@ -26,7 +26,7 @@ export class EmployerService {
   }
 
   async update(id: string, dto: UpdateEmployerDto) {
-    const employer = await this.prisma.candidateUser.findFirst({
+    const employer = await this.prisma.employerUser.findFirst({
       where: {
         id,
       },

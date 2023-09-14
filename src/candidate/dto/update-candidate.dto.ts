@@ -1,4 +1,10 @@
-import { IsString, IsEnum, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+} from 'class-validator';
 import {
   CommunicateMethod,
   EmploymentOption,
@@ -7,6 +13,10 @@ import {
 } from 'src/enums/candidate.enum';
 
 export class CandidateUpdateDto {
+  @IsBoolean()
+  @IsOptional()
+  filled: boolean;
+
   @IsOptional()
   @IsString()
   fullname: string;

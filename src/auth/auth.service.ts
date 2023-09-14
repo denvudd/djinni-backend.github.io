@@ -51,6 +51,7 @@ export class AuthService {
           ...result,
           candidate_id: candidate_info[0].id,
           fullname: candidate_info[0].fullname,
+          filled: user.candidate_info[0].filled,
         };
       } else {
         return {
@@ -58,6 +59,7 @@ export class AuthService {
           ...result,
           employer_id: employer_info[0].id,
           fullname: employer_info[0].fullname,
+          filled: user.employer_info[0].filled,
         };
       }
     } else {

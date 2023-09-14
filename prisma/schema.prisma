@@ -37,6 +37,7 @@ model CandidateUser {
   city         String  @default("Київ")
   isRelocate   Boolean @default(false)
   experience   Int     @default(0)
+  filled       Boolean @default(false)
 
   category          String?
   hourlyRate        Int?
@@ -112,6 +113,7 @@ model EmployerUser {
   dou                String?
   phone              String?
   aboutCompany       String?
+  filled             Boolean @default(false)
 
   vacancies Vacancy[]
   offers    Offer[]
