@@ -2,6 +2,91 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class CountriesService {
+  findPopularCities() {
+    return [
+      {
+        city: 'Kyiv',
+
+        admin_name: 'Kyiv, Misto',
+      },
+      {
+        city: 'Kharkiv',
+
+        admin_name: 'Kharkivska Oblast',
+      },
+      {
+        city: 'Odesa',
+
+        admin_name: 'Odeska Oblast',
+      },
+      {
+        city: 'Dnipro',
+
+        admin_name: 'Dnipropetrovska Oblast',
+      },
+      {
+        city: 'Donetsk',
+
+        admin_name: 'Donetska Oblast',
+      },
+      {
+        city: 'Zaporizhzhia',
+
+        admin_name: 'Zaporizka Oblast',
+      },
+      {
+        city: 'Lviv',
+
+        admin_name: 'Lvivska Oblast',
+      },
+      {
+        city: 'Kryvyi Rih',
+
+        admin_name: 'Dnipropetrovska Oblast',
+      },
+      {
+        city: 'Sevastopol',
+
+        admin_name: 'Sevastopol, Misto',
+      },
+      {
+        city: 'Mykolaiv',
+
+        admin_name: 'Mykolaivska Oblast',
+      },
+      {
+        city: 'Mariupol',
+
+        admin_name: 'Donetska Oblast',
+      },
+      {
+        city: 'Luhansk',
+
+        admin_name: 'Luhanska Oblast',
+      },
+      {
+        city: 'Vinnytsia',
+
+        admin_name: 'Vinnytska Oblast',
+      },
+      {
+        city: 'Makiivka',
+
+        admin_name: 'Donetska Oblast',
+      },
+      {
+        city: 'Simferopol',
+
+        admin_name: 'Krym, Avtonomna Respublika',
+      },
+      {
+        city: 'Poltava',
+
+        admin_name: 'Poltavska Oblast',
+      },
+    ];
+  }
+
   findUkrainianCities() {
     return [
       {

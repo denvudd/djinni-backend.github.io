@@ -9,4 +9,9 @@ export class CountriesController {
   findAll() {
     return this.countriesService.findUkrainianCities();
   }
+
+  @Get('popular')
+  findPopularCities() {
+    return this.countriesService.findPopularCities();
+  }
 }

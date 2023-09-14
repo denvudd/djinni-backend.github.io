@@ -26,6 +26,7 @@ export class CandidateService {
       keywords,
       english_level,
       employment_options,
+      location,
     } = queryParams;
 
     const filter: Prisma.CandidateUserWhereInput = {
@@ -41,6 +42,10 @@ export class CandidateService {
 
     if (title) {
       filter.category = title;
+    }
+
+    if (location) {
+      filter.city = location;
     }
 
     if (keywords) {
@@ -60,11 +65,29 @@ export class CandidateService {
       filter.employmentOptions = employment_options;
     }
 
-    return this.prisma.candidateUser.findMany({
-      where: filter,
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    // I use Promise.all() here because according to Prisma's documentation $transaction executes sequentially
+    // documentation: https://www.prisma.io/docs/concepts/components/prisma-client/transactions#about-transactions-in-prisma
+    // relative issue: https://github.com/prisma/prisma/issues/7550#issuecomment-1594572700
+    const [candidates, count] = await Promise.all([
+      this.prisma.candidateUser.findMany({
+        where: filter,
+        include: {
+          skills: true,
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.candidateUser.count({
+        where: filter,
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      candidates,
+      count,
+    };
   }
 
   async findOneById(id: string) {

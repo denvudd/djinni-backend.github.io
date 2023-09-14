@@ -60,6 +60,14 @@ export class CadidatesListQueryDto {
   salary_max: number;
 
   @ApiProperty({
+    description: 'city where candidate from',
+    required: false,
+  })
+  @Transform(({ value }) => toLowerCase(value))
+  @IsOptional()
+  location: string;
+
+  @ApiProperty({
     description: 'title for categories of candidate',
     required: false,
   })
