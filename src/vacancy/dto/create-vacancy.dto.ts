@@ -5,6 +5,8 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  Max,
+  Min,
 } from 'class-validator';
 
 enum EmploymentOption {
@@ -51,6 +53,12 @@ export class CreateVacancyDto {
   domain: string;
 
   @IsString()
+  @Min(300, {
+    message: 'Description must be more than 300 characters',
+  })
+  @Max(14000, {
+    message: 'Description must be less than 14000 characters',
+  })
   description: string;
 
   @IsOptional()
@@ -71,12 +79,19 @@ export class CreateVacancyDto {
   @IsBoolean()
   isRelocate: boolean;
 
+  @IsOptional()
   @IsDecimal()
-  salaryFork: number;
+  salaryForkGte: number;
 
   @IsOptional()
   @IsDecimal()
-  privateSalaryFork: number;
+  salaryForkLte: number;
+
+  @IsDecimal()
+  privateSalaryForkGte: number;
+
+  @IsDecimal()
+  privateSalaryForkLte: number;
 
   @IsDecimal()
   experience: number;

@@ -78,10 +78,8 @@ export class VacancyService {
         gte: exp_from,
         lte: exp_to,
       },
-      salaryFork: {
-        gte: salary_min,
-        lte: salary_max,
-      },
+      salaryForkGte: salary_min,
+      salaryForkLte: salary_max,
     };
 
     if (title) {

@@ -129,22 +129,24 @@ model Vacancy {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name              String
-  domain            String
-  description       String           @db.VarChar(1500)
-  category          String
-  employmentOptions EmploymentOption @default(Remote)
-  country           String           @default("Україна")
-  city              String?
-  isRelocate        Boolean          @default(false)
-  salaryFork        Decimal
-  privateSalaryFork Decimal?
-  experience        Decimal          @default(0)
-  english           EnglishLevel     @default(NoEnglish)
-  companyType       CompanyType      @default(None)
-  clarifiedData     ClarifiedData[]
-  youtube           String?
-  keywords          VacancyKeyword[]
+  name                 String
+  domain               String
+  description          String           @db.VarChar(14000)
+  category             String
+  employmentOptions    EmploymentOption @default(Remote)
+  country              String           @default("Україна")
+  city                 String?
+  isRelocate           Boolean          @default(false)
+  salaryForkGte        Decimal
+  salaryForkLte        Decimal
+  privateSalaryForkGte Decimal?
+  privateSalaryForkLte Decimal?
+  experience           Decimal          @default(0)
+  english              EnglishLevel     @default(NoEnglish)
+  companyType          CompanyType      @default(None)
+  clarifiedData        ClarifiedData[]
+  youtube              String?
+  keywords             VacancyKeyword[]
 
   employerId String
   employer   EmployerUser @relation(fields: [employerId], references: [id], onDelete: Cascade)
