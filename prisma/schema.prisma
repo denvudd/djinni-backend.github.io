@@ -26,7 +26,10 @@ model User {
 }
 
 model CandidateUser {
-  id String @id @default(cuid())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  views     Int?     @default(0)
 
   userId String
   user   User[] @relation("CandidateToUser")
@@ -99,7 +102,9 @@ model CandidateSkill {
 }
 
 model EmployerUser {
-  id String @id @default(cuid())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   userId String
   user   User[] @relation("EmployerToUser")
@@ -126,7 +131,7 @@ model Vacancy {
 
   name              String
   domain            String
-  description       String
+  description       String           @db.VarChar(1500)
   category          String
   employmentOptions EmploymentOption @default(Remote)
   country           String           @default("Україна")

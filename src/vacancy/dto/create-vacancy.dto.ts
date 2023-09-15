@@ -81,6 +81,7 @@ export class CreateVacancyDto {
   @IsDecimal()
   experience: number;
 
+  @IsOptional()
   @IsEnum(EnglishLevel, { message: 'Invalid english level method option' })
   english: EnglishLevel;
 

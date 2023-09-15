@@ -21,6 +21,11 @@ export class EmployerController {
     return this.employerService.findOneById(id);
   }
 
+  @Get(':id/vacancies')
+  getEmployerVacancies(@Param('id') id: string) {
+    return this.employerService.getEmployerVacancies(id);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

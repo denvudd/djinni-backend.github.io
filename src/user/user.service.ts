@@ -44,6 +44,7 @@ export class UserService {
           communicateMethod: 'Djinni',
           preferableLang: 'Ukrainian',
           filled: false,
+          views: 0,
         },
       });
 

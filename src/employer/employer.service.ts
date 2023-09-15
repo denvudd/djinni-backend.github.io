@@ -25,6 +25,22 @@ export class EmployerService {
     return employer;
   }
 
+  async getEmployerVacancies(id: string) {
+    const employer = await this.prisma.employerUser.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        vacancies: true,
+      },
+    });
+
+    if (!employer)
+      throw new UnauthorizedException('This employer is not exists.');
+
+    return employer.vacancies;
+  }
+
   async update(id: string, dto: UpdateEmployerDto) {
     const employer = await this.prisma.employerUser.findFirst({
       where: {

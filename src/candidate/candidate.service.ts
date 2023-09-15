@@ -38,6 +38,7 @@ export class CandidateService {
         gte: salary_min,
         lte: salary_max,
       },
+      filled: true,
     };
 
     if (title) {
@@ -95,6 +96,18 @@ export class CandidateService {
       where: {
         id,
       },
+    });
+
+    if (!candidate)
+      throw new UnauthorizedException('This candidate is not exists.');
+
+    const updatedCandidateWithViews = await this.prisma.candidateUser.update({
+      where: {
+        id,
+      },
+      data: {
+        views: candidate.views + 1,
+      },
       include: {
         skills: true,
         blockedDomains: true,
@@ -102,10 +115,7 @@ export class CandidateService {
       },
     });
 
-    if (!candidate)
-      throw new UnauthorizedException('This candidate is not exists.');
-
-    return candidate;
+    return updatedCandidateWithViews;
   }
 
   async getSkills(candidateId: string) {

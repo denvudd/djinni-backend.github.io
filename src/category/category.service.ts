@@ -62,4 +62,30 @@ export class CategoryService {
       },
     ];
   }
+
+  async findAllDomainCategories() {
+    return [
+      { id: 1, name: 'Adult' },
+      { id: 2, name: 'Advertising / Marketing' },
+      { id: 3, name: 'Automotive' },
+      { id: 4, name: 'Blockchain / Crypto' },
+      { id: 5, name: 'Dating' },
+      { id: 6, name: 'E-commerce / Marketplace' },
+      { id: 7, name: 'Education' },
+      { id: 8, name: 'Fintech' },
+      { id: 9, name: 'Gambling' },
+      { id: 10, name: 'Gamedev' },
+      { id: 11, name: 'Hardware / IoT' },
+      { id: 12, name: 'Healthcare / MedTech' },
+      { id: 13, name: 'Machine Learning / Big Data' },
+      { id: 14, name: 'Media' },
+      { id: 15, name: 'MilTech' },
+      { id: 16, name: 'Mobile' },
+      { id: 17, name: 'SaaS' },
+      { id: 18, name: 'Security' },
+      { id: 19, name: 'Telecom / Communications' },
+      { id: 20, name: 'Travel / Tourism' },
+      { id: 21, name: 'Other' },
+    ];
+  }
 }

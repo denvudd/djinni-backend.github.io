@@ -9,4 +9,9 @@ export class CategoryController {
   findAll() {
     return this.categoryService.findAll();
   }
+
+  @Get('/domain-categories')
+  findAllDomainCategories() {
+    return this.categoryService.findAllDomainCategories();
+  }
 }
