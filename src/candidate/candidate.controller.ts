@@ -32,6 +32,11 @@ export class CandidateController {
     return this.candidateService.findOneById(id);
   }
 
+  @Get(':id/public')
+  findOneByIdPublic(@Param('id') id: string) {
+    return this.candidateService.findOneByIdPublic(id);
+  }
+
   @UseGuards(JwtGuard)
   @Get(':id/skills')
   getCandidateSkills(@Param('id') id: string) {

@@ -77,6 +77,19 @@ export class CandidateService {
         },
         skip: (page - 1) * limit,
         take: limit,
+        orderBy: [
+          {
+            experience: 'desc',
+          },
+          {
+            updatedAt: 'asc',
+          },
+          {
+            skills: {
+              _count: 'desc',
+            },
+          },
+        ],
       }),
       this.prisma.candidateUser.count({
         where: filter,
@@ -92,6 +105,19 @@ export class CandidateService {
   }
 
   async findOneById(id: string) {
+    const candidate = await this.prisma.candidateUser.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!candidate)
+      throw new UnauthorizedException('This candidate is not exists.');
+
+    return candidate;
+  }
+
+  async findOneByIdPublic(id: string) {
     const candidate = await this.prisma.candidateUser.findUnique({
       where: {
         id,
