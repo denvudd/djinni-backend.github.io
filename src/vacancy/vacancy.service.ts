@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateVacancyDto } from './dto/create-vacancy.dto';
+import { ClarifiedDataEnum, CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import { PrismaService } from 'src/prisma.service';
 import { VacanciesListQueryDto } from './dto/vacancies-list.dto';
@@ -151,17 +151,115 @@ export class VacancyService {
   }
 
   async update(id: string, updateVacancyDto: UpdateVacancyDto) {
-    const { employerId, clarifiedData, keywords, ...restDto } =
-      updateVacancyDto;
+    const {
+      employerId,
+      clarifiedData: newClarifiedData,
+      keywords: newKeywords,
+      ...rest
+    } = updateVacancyDto;
 
-    return await this.prismaService.vacancy.update({
+    const existingVacancy = await this.prismaService.vacancy.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        keywords: {
+          select: {
+            name: true,
+            vacancyId: true,
+          },
+        },
+        clarifiedData: {
+          select: {
+            name: true,
+            vacancyId: true,
+          },
+        },
+      },
+    });
+
+    const currentKeywords = existingVacancy.keywords.map(
+      (keyword) => keyword.name,
+    );
+
+    const keywordsToDelete = currentKeywords.filter(
+      (keyword) => !newKeywords.includes(keyword),
+    );
+
+    const keywordsToCreate = newKeywords.filter(
+      (keyword) => !currentKeywords.includes(keyword),
+    );
+
+    const currentClarifiedData = existingVacancy.clarifiedData.map(
+      (data) => data.name as ClarifiedDataEnum,
+    );
+
+    const clarifiedDataToDelete = currentClarifiedData.filter(
+      (data) => !newClarifiedData.includes(data),
+    );
+
+    const clarifiedDataToCreate = newClarifiedData.filter(
+      (data) => !currentClarifiedData.includes(data),
+    );
+
+    // Обновите вакансию, подключая к ней только что созданные ключевые слова
+    const updatedVacancy = await this.prismaService.vacancy.update({
       where: {
         id,
       },
       data: {
-        ...restDto,
+        clarifiedData: {
+          deleteMany: clarifiedDataToDelete.map((name) => ({
+            name,
+          })),
+          create: clarifiedDataToCreate.map((name) => ({
+            name,
+          })),
+        },
+        keywords: {
+          deleteMany: keywordsToDelete.map((name) => ({
+            name,
+            vacancyId: id,
+          })),
+          create: keywordsToCreate.map((name) => ({
+            name,
+          })),
+        },
+        employer: {
+          connect: {
+            id: employerId,
+          },
+        },
+        ...rest,
+      },
+      include: {
+        clarifiedData: true,
+        keywords: {
+          select: {
+            name: true,
+            id: true,
+          },
+        },
+        employer: {
+          select: {
+            fullname: true,
+            id: true,
+            positionAndCompany: true,
+            companyLink: true,
+            linkedIn: true,
+            telegram: true,
+            user: {
+              select: {
+                email: true,
+                avatar: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    return updatedVacancy;
   }
 
   async addToDraft(id: string) {

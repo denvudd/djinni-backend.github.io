@@ -18,7 +18,7 @@ enum CompanyType {
   Agency = 'Agency',
 }
 
-enum ClarifiedDataEnum {
+export enum ClarifiedDataEnum {
   None = 'None',
   Part_time = 'Part_time',
   Test_task = 'Test_task',
