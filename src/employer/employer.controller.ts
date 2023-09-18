@@ -9,12 +9,15 @@ import {
   Query,
 } from '@nestjs/common';
 import { EmployerService } from './employer.service';
-import { CreateEmployerDto } from './dto/create-employer.dto';
 import { UpdateEmployerDto } from './dto/update-employer.dto';
+import { VacancyService } from 'src/vacancy/vacancy.service';
 
 @Controller('employer')
 export class EmployerController {
-  constructor(private readonly employerService: EmployerService) {}
+  constructor(
+    private readonly employerService: EmployerService,
+    private readonly vacancyService: VacancyService,
+  ) {}
 
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -24,6 +27,11 @@ export class EmployerController {
   @Get(':id/vacancies')
   getEmployerVacancies(@Param('id') id: string) {
     return this.employerService.getEmployerVacancies(id);
+  }
+
+  @Get(':id/vacancies/drafts')
+  getDraftVacancies(@Param('id') id: string) {
+    return this.vacancyService.getDrafts(id);
   }
 
   @Patch(':id')

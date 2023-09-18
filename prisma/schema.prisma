@@ -125,9 +125,11 @@ model EmployerUser {
 }
 
 model Vacancy {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  active         Boolean  @default(false)
+  responsesCount Int      @default(0)
 
   name                 String
   domain               String
@@ -137,11 +139,11 @@ model Vacancy {
   country              String           @default("Україна")
   city                 String?
   isRelocate           Boolean          @default(false)
-  salaryForkGte        Decimal
-  salaryForkLte        Decimal
-  privateSalaryForkGte Decimal?
-  privateSalaryForkLte Decimal?
-  experience           Decimal          @default(0)
+  salaryForkGte        Int?
+  salaryForkLte        Int?
+  privateSalaryForkGte Int
+  privateSalaryForkLte Int
+  experience           Int              @default(0)
   english              EnglishLevel     @default(NoEnglish)
   companyType          CompanyType      @default(None)
   clarifiedData        ClarifiedData[]

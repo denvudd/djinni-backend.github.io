@@ -1,31 +1,14 @@
 import {
   IsArray,
   IsBoolean,
-  IsDecimal,
   IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
-  Max,
-  Min,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
-
-enum EmploymentOption {
-  Remote = 'Remote',
-  Office = 'Office',
-  PartTime = 'PartTime',
-  Freelance = 'Freelance',
-  RelocateCity = 'RelocateCity',
-  RelocateCountry = 'RelocateCountry',
-}
-
-enum EnglishLevel {
-  NoEnglish = 'NoEnglish',
-  BeginnerElementary = 'BeginnerElementary',
-  PreIntermediate = 'PreIntermediate',
-  Intermediate = 'Intermediate',
-  UpperIntermediate = 'UpperIntermediate',
-  AdvancedFluent = 'AdvancedFluent',
-}
+import { EmploymentOption, EnglishLevel } from 'src/enums/candidate.enum';
 
 enum CompanyType {
   None = 'None',
@@ -46,6 +29,9 @@ export class CreateVacancyDto {
   @IsString()
   employerId: string;
 
+  @IsBoolean()
+  active: boolean;
+
   @IsString()
   name: string;
 
@@ -53,10 +39,10 @@ export class CreateVacancyDto {
   domain: string;
 
   @IsString()
-  @Min(300, {
+  @MinLength(300, {
     message: 'Description must be more than 300 characters',
   })
-  @Max(14000, {
+  @MaxLength(14000, {
     message: 'Description must be less than 14000 characters',
   })
   description: string;
@@ -80,20 +66,20 @@ export class CreateVacancyDto {
   isRelocate: boolean;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   salaryForkGte: number;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   salaryForkLte: number;
 
-  @IsDecimal()
+  @IsNumber()
   privateSalaryForkGte: number;
 
-  @IsDecimal()
+  @IsNumber()
   privateSalaryForkLte: number;
 
-  @IsDecimal()
+  @IsNumber()
   experience: number;
 
   @IsOptional()

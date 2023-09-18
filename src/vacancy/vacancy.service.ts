@@ -111,15 +111,43 @@ export class VacancyService {
   }
 
   async findOneById(id: string) {
-    return await this.prismaService.vacancy.findUnique({
+    const { employer, ...rest } = await this.prismaService.vacancy.findUnique({
       where: {
         id,
       },
       include: {
         keywords: true,
         clarifiedData: true,
+        employer: {
+          select: {
+            id: true,
+            companyLink: true,
+            dou: true,
+            fullname: true,
+            positionAndCompany: true,
+            aboutCompany: true,
+            user: {
+              select: {
+                avatar: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    return {
+      ...rest,
+      employer: {
+        id: employer.id,
+        companyLink: employer.companyLink,
+        aboutCompany: employer.aboutCompany,
+        dou: employer.dou,
+        fullname: employer.fullname,
+        positionAndCompany: employer.positionAndCompany,
+        avatar: employer.user[0].avatar,
+      },
+    };
   }
 
   async update(id: string, updateVacancyDto: UpdateVacancyDto) {
@@ -132,6 +160,37 @@ export class VacancyService {
       },
       data: {
         ...restDto,
+      },
+    });
+  }
+
+  async addToDraft(id: string) {
+    return await this.prismaService.vacancy.update({
+      where: {
+        id,
+      },
+      data: {
+        active: false,
+      },
+    });
+  }
+
+  async removeFromDraft(id: string) {
+    return await this.prismaService.vacancy.update({
+      where: {
+        id,
+      },
+      data: {
+        active: true,
+      },
+    });
+  }
+
+  async getDrafts(id: string) {
+    return await this.prismaService.vacancy.findMany({
+      where: {
+        employerId: id,
+        active: false,
       },
     });
   }

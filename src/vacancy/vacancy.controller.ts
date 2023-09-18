@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { VacancyService } from './vacancy.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
@@ -43,6 +35,18 @@ export class VacancyController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateVacancyDto: UpdateVacancyDto) {
     return this.vacancyService.update(id, updateVacancyDto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch(':id/add-to-draft')
+  addToDraft(@Param('id') id: string) {
+    return this.vacancyService.addToDraft(id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch(':id/remove-from-draft')
+  removeFromDraft(@Param('id') id: string) {
+    return this.vacancyService.removeFromDraft(id);
   }
 
   // @Delete(':id')
