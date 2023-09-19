@@ -152,6 +152,7 @@ export class EmployerService {
                 favoriteCandidates: {
                   select: {
                     employerId: true,
+                    id: true,
                   },
                 },
               },

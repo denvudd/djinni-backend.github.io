@@ -77,6 +77,7 @@ export class CandidateService {
           favoriteCandidates: {
             select: {
               employerId: true,
+              id: true,
             },
           },
         },
