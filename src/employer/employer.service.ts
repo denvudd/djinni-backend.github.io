@@ -65,6 +65,102 @@ export class EmployerService {
     };
   }
 
+  async addCandidateToFavorite(id: string, candidateId: string) {
+    const employer = await this.prisma.employerUser.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    const candidate = await this.prisma.candidateUser.findUnique({
+      where: {
+        id: candidateId,
+      },
+    });
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+    if (!candidate) throw new NotFoundException('Candidate is not exists.');
+
+    const favoriteCandidate = await this.prisma.favoriteCandidate.create({
+      data: {
+        candidateId,
+        employerId: employer.id,
+      },
+    });
+
+    const result = await this.prisma.employerUser.update({
+      where: {
+        id,
+      },
+      data: {
+        favoriteCandidates: {
+          connect: {
+            id: favoriteCandidate.id,
+          },
+        },
+      },
+    });
+
+    return result;
+  }
+
+  async removeCandidateFromFavorite(id: string, favoriteId: string) {
+    const employer = await this.prisma.employerUser.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    const candidate = await this.prisma.favoriteCandidate.findUnique({
+      where: {
+        id: favoriteId,
+      },
+    });
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+    if (!candidate)
+      throw new NotFoundException('Favorite candidate is not exists.');
+
+    const result = await this.prisma.favoriteCandidate.deleteMany({
+      where: {
+        id: favoriteId,
+        employerId: id,
+      },
+    });
+
+    return {
+      success: true,
+      deletedCound: result.count,
+    };
+  }
+
+  async getFavoriteCandidates(id: string) {
+    const employer = await this.prisma.employerUser.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        _count: {
+          select: {
+            favoriteCandidates: true,
+          },
+        },
+        id: true,
+        favoriteCandidates: true,
+      },
+    });
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+
+    const { _count, favoriteCandidates } = employer;
+
+    return {
+      id,
+      count: _count.favoriteCandidates,
+      favoriteCandidates,
+    };
+  }
+
   // remove(id: number) {
   //   return `This action removes a #${id} employer`;
   // }

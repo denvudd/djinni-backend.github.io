@@ -11,6 +11,7 @@ import {
 import { EmployerService } from './employer.service';
 import { UpdateEmployerDto } from './dto/update-employer.dto';
 import { VacancyService } from 'src/vacancy/vacancy.service';
+import { AddFavoriteCandidateDto } from './dto/add-favorite-candidate.dto';
 
 @Controller('employer')
 export class EmployerController {
@@ -32,6 +33,30 @@ export class EmployerController {
   @Get(':id/vacancies/drafts')
   getDraftVacancies(@Param('id') id: string) {
     return this.vacancyService.getDrafts(id);
+  }
+
+  @Get(':id/favorite-candidates')
+  getFavoriteCandidates(@Param('id') id: string) {
+    return this.employerService.getFavoriteCandidates(id);
+  }
+
+  @Post(':id/candidate-to-favorite')
+  addCandidateToFavorite(
+    @Param('id') id: string,
+    @Body() addFavoriteCandidateDto: AddFavoriteCandidateDto,
+  ) {
+    return this.employerService.addCandidateToFavorite(
+      id,
+      addFavoriteCandidateDto.candidateId,
+    );
+  }
+
+  @Delete(':id/candidate-to-favorite/:favoriteId')
+  removeCandidateFromFavorite(
+    @Param('id') id: string,
+    @Param('favoriteId') favoriteId: string,
+  ) {
+    return this.employerService.removeCandidateFromFavorite(id, favoriteId);
   }
 
   @Patch(':id')
