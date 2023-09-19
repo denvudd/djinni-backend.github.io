@@ -74,6 +74,12 @@ export class CandidateService {
         where: filter,
         include: {
           skills: true,
+          favoriteCandidates: {
+            select: {
+              employerId: true,
+              id: true,
+            },
+          },
         },
         skip: (page - 1) * limit,
         take: limit,
