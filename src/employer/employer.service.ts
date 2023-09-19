@@ -3,10 +3,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateEmployerDto } from './dto/create-employer.dto';
 import { UpdateEmployerDto } from './dto/update-employer.dto';
 import { PrismaService } from 'src/prisma.service';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class EmployerService {
@@ -146,7 +144,20 @@ export class EmployerService {
           },
         },
         id: true,
-        favoriteCandidates: true,
+        favoriteCandidates: {
+          select: {
+            candidate: {
+              include: {
+                skills: true,
+                favoriteCandidates: {
+                  select: {
+                    employerId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -157,7 +168,9 @@ export class EmployerService {
     return {
       id,
       count: _count.favoriteCandidates,
-      favoriteCandidates,
+      favoriteCandidates: favoriteCandidates.map((favoriteCandidate) => ({
+        ...favoriteCandidate.candidate,
+      })),
     };
   }
 
