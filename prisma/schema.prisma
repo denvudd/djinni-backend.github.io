@@ -22,7 +22,7 @@ model User {
   role           UserRole
   candidate_info CandidateUser[] @relation("CandidateToUser")
   employer_info  EmployerUser[]  @relation("EmployerToUser")
-  ReplyOnOffer   ReplyOnOffer[]
+  replyOnOffer   ReplyOnOffer[]
 }
 
 model CandidateUser {
@@ -64,10 +64,10 @@ model CandidateUser {
   portfolio  String?
   resumeFile String?
 
-  blockedDomains    BlockedDomain[]      @relation("BlockedDomainToCandidate")
-  blockedTypes      BlockedVacancyType[] @relation("BlockedVacancyTypeToCandidate")
-  skills            CandidateSkill[]     @relation("SkillToCandidate")
-  Offer             Offer[]
+  blockedDomains     BlockedDomain[]      @relation("BlockedDomainToCandidate")
+  blockedTypes       BlockedVacancyType[] @relation("BlockedVacancyTypeToCandidate")
+  skills             CandidateSkill[]     @relation("SkillToCandidate")
+  offers             Offer[]
   favoriteCandidates FavoriteCandidate[]
 }
 
@@ -121,8 +121,8 @@ model EmployerUser {
   aboutCompany       String?
   filled             Boolean @default(false)
 
-  vacancies         Vacancy[]
-  offers            Offer[]
+  vacancies          Vacancy[]
+  offers             Offer[]
   favoriteCandidates FavoriteCandidate[]
 }
 
@@ -181,8 +181,8 @@ model Offer {
 
   coverLetter String
 
-  vacancyId   String
-  vacancy     Vacancy        @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  vacancyId   String?
+  vacancy     Vacancy?       @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
   employerId  String
   employer    EmployerUser   @relation(fields: [employerId], references: [id], onDelete: Cascade)
   candidateId String

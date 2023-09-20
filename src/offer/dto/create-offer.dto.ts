@@ -1,7 +1,8 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateOfferDto {
   @IsString()
+  @IsOptional()
   vacancyId: string;
 
   @IsString()

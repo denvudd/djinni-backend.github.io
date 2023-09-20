@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -8,8 +12,56 @@ import { ReplyOfferDto } from './dto/reply-offer.dto';
 export class OfferService {
   constructor(private prismaService: PrismaService) {}
   async create(createOfferDto: CreateOfferDto) {
+    const candidate = await this.prismaService.candidateUser.findUnique({
+      where: {
+        id: createOfferDto.candidateId,
+      },
+      select: {
+        id: true,
+        offers: {
+          select: {
+            candidateId: true,
+          },
+        },
+      },
+    });
+
+    const employer = await this.prismaService.employerUser.findUnique({
+      where: {
+        id: createOfferDto.employerId,
+      },
+      select: {
+        id: true,
+        offers: {
+          select: {
+            employerId: true,
+          },
+        },
+      },
+    });
+
+    if (!candidate) throw new NotFoundException('Candidate is not exists.');
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+
+    if (employer.offers.find((e) => e.employerId === createOfferDto.employerId))
+      throw new ConflictException('Offer is already exists.');
+
+    if (
+      candidate.offers.find((c) => c.candidateId === createOfferDto.candidateId)
+    )
+      throw new ConflictException('Offer is already exists.');
+
     const offer = await this.prismaService.offer.create({
       data: createOfferDto,
+      include: {
+        vacancy: {
+          select: {
+            active: true,
+            category: true,
+            id: true,
+          },
+        },
+      },
     });
 
     return offer;
@@ -43,6 +95,35 @@ export class OfferService {
         },
       },
     });
+  }
+
+  async getOffersByEmployerId(employerId: string) {
+    return await this.prismaService.offer.findMany({
+      where: {
+        employerId,
+      },
+    });
+  }
+
+  async deleteOfferByEmployerId(id: string, offerId) {
+    const offer = await this.prismaService.offer.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!offer) throw new NotFoundException('Offer is not exists.');
+
+    const deleted = await this.prismaService.offer.deleteMany({
+      where: {
+        id: offer.id,
+      },
+    });
+
+    return {
+      success: true,
+      deletedCount: deleted.count,
+    };
   }
 
   async findOne(id: string) {

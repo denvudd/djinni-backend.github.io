@@ -128,6 +128,10 @@ export class CandidateService {
       where: {
         id,
       },
+      select: {
+        views: true,
+        id: true,
+      },
     });
 
     if (!candidate)
@@ -144,6 +148,14 @@ export class CandidateService {
         skills: true,
         blockedDomains: true,
         blockedTypes: true,
+        offers: {
+          select: {
+            id: true,
+            candidateId: true,
+            employerId: true,
+            vacancyId: true,
+          },
+        },
       },
     });
 
