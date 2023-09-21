@@ -144,7 +144,19 @@ export class OfferService {
           active: true,
           isArchive: false,
         },
+        orderBy: {
+          updatedAt: 'desc',
+        },
         include: {
+          replies: {
+            orderBy: {
+              updatedAt: 'asc',
+            },
+            select: {
+              text: true,
+              updatedAt: true,
+            },
+          },
           candidate: {
             select: {
               fullname: true,
@@ -297,7 +309,7 @@ export class OfferService {
         },
         replies: {
           orderBy: {
-            createdAt: 'desc',
+            createdAt: 'asc',
           },
           include: {
             author: {
@@ -333,6 +345,7 @@ export class OfferService {
             linkedIn: true,
             user: {
               select: {
+                id: true,
                 email: true,
                 avatar: true,
               },
@@ -358,6 +371,7 @@ export class OfferService {
             whatsApp: true,
             user: {
               select: {
+                id: true,
                 avatar: true,
                 email: true,
               },
@@ -450,29 +464,40 @@ export class OfferService {
     if (!offer) throw new NotFoundException('Offer is not exists.');
     if (!reply) throw new NotFoundException('Reply is not exists.');
 
-    return await this.prismaService.replyOnOffer.create({
-      data: {
-        offerId,
-        ...replyToOfferDto,
-      },
-      include: {
-        author: {
-          select: {
-            avatar: true,
-            candidate_info: {
-              select: {
-                fullname: true,
+    // update updatedAt offer before create reply for sorting offers by new replies
+    return await Promise.all([
+      this.prismaService.offer.update({
+        where: {
+          id: offerId,
+        },
+        data: {
+          updatedAt: new Date(),
+        },
+      }),
+      this.prismaService.replyOnOffer.create({
+        data: {
+          offerId,
+          ...replyToOfferDto,
+        },
+        include: {
+          author: {
+            select: {
+              avatar: true,
+              candidate_info: {
+                select: {
+                  fullname: true,
+                },
               },
-            },
-            employer_info: {
-              select: {
-                fullname: true,
+              employer_info: {
+                select: {
+                  fullname: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      }),
+    ]);
   }
 
   // remove(id: number) {

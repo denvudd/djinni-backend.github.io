@@ -219,9 +219,9 @@ model OfferRefusal {
 }
 
 model ReplyOnOffer {
-  id        String   @id @default(nanoid(7))
+  id        String   @id @default(nanoid(12))
   createdAt DateTime @default(now())
-  updatetAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   text     String @db.VarChar(5000)
   authorId String
