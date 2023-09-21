@@ -12,7 +12,6 @@ import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { UseGuards } from '@nestjs/common/decorators';
-import { ReplyOfferDto } from './dto/reply-offer.dto';
 
 @Controller('offer')
 export class OfferController {
@@ -22,12 +21,6 @@ export class OfferController {
   @Post()
   create(@Body() createOfferDto: CreateOfferDto) {
     return this.offerService.create(createOfferDto);
-  }
-
-  @UseGuards(JwtGuard)
-  @Post(':id/reply')
-  replyOnOffer(@Param('id') id: string, @Body() replyOnOffer: ReplyOfferDto) {
-    return this.offerService.replyToOffer(id, replyOnOffer);
   }
 
   @UseGuards(JwtGuard)

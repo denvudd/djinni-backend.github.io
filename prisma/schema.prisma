@@ -68,6 +68,7 @@ model CandidateUser {
   blockedTypes       BlockedVacancyType[] @relation("BlockedVacancyTypeToCandidate")
   skills             CandidateSkill[]     @relation("SkillToCandidate")
   offers             Offer[]
+  refusals           OfferRefusal[]
   favoriteCandidates FavoriteCandidate[]
 }
 
@@ -123,6 +124,7 @@ model EmployerUser {
 
   vacancies          Vacancy[]
   offers             Offer[]
+  refusals           OfferRefusal[]
   favoriteCandidates FavoriteCandidate[]
 }
 
@@ -179,27 +181,49 @@ model Offer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  coverLetter String
+  coverLetter String @db.VarChar(5000)
 
-  vacancyId   String?
-  vacancy     Vacancy?       @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
-  employerId  String
-  employer    EmployerUser   @relation(fields: [employerId], references: [id], onDelete: Cascade)
-  candidateId String
-  candidate   CandidateUser  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  replies     ReplyOnOffer[]
+  vacancyId    String?
+  vacancy      Vacancy?       @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  employerId   String
+  employer     EmployerUser   @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  candidateId  String
+  candidate    CandidateUser  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  replies      ReplyOnOffer[]
+  active       Boolean        @default(true)
+  isArchive    Boolean        @default(false)
+  OfferRefusal OfferRefusal[]
 
   @@index([vacancyId])
   @@index([employerId])
   @@index([candidateId])
 }
 
+model OfferRefusal {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  message String @db.VarChar(5000)
+
+  offerId     String
+  offer       Offer         @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  employerId  String
+  employer    EmployerUser  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  candidateId String
+  candidate   CandidateUser @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([offerId])
+  @@index([employerId])
+  @@index([candidateId])
+}
+
 model ReplyOnOffer {
-  id        String   @id @default(nanoid(2))
+  id        String   @id @default(nanoid(7))
   createdAt DateTime @default(now())
   updatetAt DateTime @updatedAt
 
-  text     String @db.Text
+  text     String @db.VarChar(5000)
   authorId String
   author   User   @relation(fields: [authorId], references: [id])
   offerId  String
