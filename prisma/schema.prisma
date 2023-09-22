@@ -22,7 +22,7 @@ model User {
   role           UserRole
   candidate_info CandidateUser[] @relation("CandidateToUser")
   employer_info  EmployerUser[]  @relation("EmployerToUser")
-  replyOnOffer   ReplyOnOffer[]
+  ReplyOnOffer   ReplyOnOffer[]
 }
 
 model CandidateUser {
@@ -183,16 +183,16 @@ model Offer {
 
   coverLetter String @db.VarChar(5000)
 
-  vacancyId    String?
-  vacancy      Vacancy?       @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
-  employerId   String
-  employer     EmployerUser   @relation(fields: [employerId], references: [id], onDelete: Cascade)
-  candidateId  String
-  candidate    CandidateUser  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  replies      ReplyOnOffer[]
-  active       Boolean        @default(true)
-  isArchive    Boolean        @default(false)
-  OfferRefusal OfferRefusal[]
+  vacancyId   String?
+  vacancy     Vacancy?       @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  employerId  String
+  employer    EmployerUser   @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  candidateId String
+  candidate   CandidateUser  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  replies     ReplyOnOffer[]
+  active      Boolean        @default(true)
+  isArchive   Boolean        @default(false)
+  refusal     OfferRefusal[]
 
   @@index([vacancyId])
   @@index([employerId])
@@ -200,11 +200,12 @@ model Offer {
 }
 
 model OfferRefusal {
-  id        String   @id @default(cuid())
+  id        String   @id @default(nanoid(12))
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  message String @db.VarChar(5000)
+  message String        @db.VarChar(5000)
+  reason  RefusalReason @default(Other)
 
   offerId     String
   offer       Offer         @relation(fields: [offerId], references: [id], onDelete: Cascade)
@@ -259,6 +260,16 @@ model ClarifiedData {
 }
 
 // ENUMS 
+
+enum RefusalReason {
+  NoExperience
+  NoSkills
+  BadEnglish
+  BadLocation
+  BadSalaryMatch
+  StopedHiring
+  Other
+}
 
 enum ClarifiedDataEnum {
   None

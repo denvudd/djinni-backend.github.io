@@ -8,6 +8,7 @@ import { UpdateOfferDto } from './dto/update-offer.dto';
 import { PrismaService } from 'src/prisma.service';
 import { ReplyOfferDto } from './dto/reply-offer.dto';
 import { MoveOfferToArchiveDto } from './dto/move-offer-to-archive';
+import { RefuseOfferDto } from './dto/refuse-offer.dto';
 
 @Injectable()
 export class OfferService {
@@ -207,7 +208,20 @@ export class OfferService {
           active: false,
           isArchive: true,
         },
+        orderBy: {
+          updatedAt: 'desc',
+        },
         include: {
+          refusal: true,
+          replies: {
+            orderBy: {
+              updatedAt: 'asc',
+            },
+            select: {
+              text: true,
+              updatedAt: true,
+            },
+          },
           candidate: {
             select: {
               fullname: true,
@@ -243,33 +257,105 @@ export class OfferService {
   }
 
   async moveOfferToArchive(
-    id: string,
+    employerId: string,
+    offerId: string,
     moveOfferToArchiveDto: MoveOfferToArchiveDto,
   ) {
     const offer = await this.prismaService.offer.findUnique({
       where: {
-        id,
-        active: true,
-        isArchive: false,
-        employerId: moveOfferToArchiveDto.employerId,
+        id: offerId,
+        employerId: employerId,
         candidateId: moveOfferToArchiveDto.candidateId,
       },
     });
 
-    if (!offer)
-      throw new NotFoundException(
-        'Offer is not exists or he is already in archive.',
-      );
+    if (!offer) throw new NotFoundException('Offer is not exists.');
 
-    return await this.prismaService.offer.update({
+    if (offer.isArchive || !offer.active)
+      throw new ConflictException('Offer is already archived or not active.');
+
+    const { active, id, isArchive } = await this.prismaService.offer.update({
       where: {
-        id,
+        id: offerId,
       },
       data: {
         active: false,
         isArchive: true,
       },
+      select: {
+        active: true,
+        isArchive: true,
+        id: true,
+      },
     });
+
+    return {
+      success: true,
+      active,
+      isArchive,
+      offerId: id,
+    };
+  }
+
+  async refuseOffer(
+    employerId: string,
+    offerId: string,
+    refuseOfferDto: RefuseOfferDto,
+  ) {
+    const offer = await this.prismaService.offer.findUnique({
+      where: {
+        id: offerId,
+        employerId: employerId,
+        candidateId: refuseOfferDto.candidateId,
+      },
+    });
+
+    if (!offer) throw new NotFoundException('Offer is not exists.');
+
+    if (offer.isArchive || !offer.active)
+      throw new ConflictException('Offer is already archived or not active.');
+
+    const [refusal] = await this.prismaService.$transaction([
+      this.prismaService.offerRefusal.create({
+        data: {
+          reason: refuseOfferDto.reason,
+          message: refuseOfferDto.message,
+          offer: {
+            connect: {
+              id: offerId,
+            },
+          },
+          employer: {
+            connect: {
+              id: employerId,
+            },
+          },
+          candidate: {
+            connect: {
+              id: refuseOfferDto.candidateId,
+            },
+          },
+        },
+      }),
+      this.prismaService.offer.update({
+        where: {
+          id: offerId,
+        },
+        data: {
+          active: false,
+          isArchive: true,
+        },
+      }),
+    ]);
+
+    return {
+      success: true,
+      candidateId: refusal.candidateId,
+      employerId: refusal.employerId,
+      offerId: refusal.offerId,
+      reason: refusal.reason,
+      message: refusal.message,
+    };
   }
 
   async deleteOfferByEmployerId(id: string, offerId) {
@@ -376,6 +462,13 @@ export class OfferService {
                 email: true,
               },
             },
+          },
+        },
+        refusal: {
+          select: {
+            createdAt: true,
+            reason: true,
+            message: true,
           },
         },
       },
