@@ -9,6 +9,7 @@ import { PrismaService } from 'src/prisma.service';
 import { ReplyOfferDto } from './dto/reply-offer.dto';
 import { MoveOfferToArchiveDto } from './dto/move-offer-to-archive';
 import { RefuseOfferDto } from './dto/refuse-offer.dto';
+import { MoveOfferToFavoriteDto } from './dto/move-offer-to-favorite';
 
 @Injectable()
 export class OfferService {
@@ -274,25 +275,135 @@ export class OfferService {
     if (offer.isArchive || !offer.active)
       throw new ConflictException('Offer is already archived or not active.');
 
-    const { active, id, isArchive } = await this.prismaService.offer.update({
-      where: {
-        id: offerId,
-      },
-      data: {
-        active: false,
-        isArchive: true,
-      },
-      select: {
-        active: true,
-        isArchive: true,
-        id: true,
-      },
-    });
+    const { active, id, isArchive, isFavorite } =
+      await this.prismaService.offer.update({
+        where: {
+          id: offerId,
+        },
+        data: {
+          active: false,
+          isArchive: true,
+        },
+        select: {
+          active: true,
+          isArchive: true,
+          isFavorite: true,
+          id: true,
+        },
+      });
 
     return {
       success: true,
       active,
       isArchive,
+      isFavorite,
+      offerId: id,
+    };
+  }
+
+  async getFavoriteOffersByEmployerId(employerId: string) {
+    const employer = await this.prismaService.employerUser.findUnique({
+      where: {
+        id: employerId,
+      },
+    });
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+
+    const [offers, count] = await Promise.all([
+      this.prismaService.offer.findMany({
+        where: {
+          employerId,
+          isFavorite: true,
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        include: {
+          refusal: true,
+          replies: {
+            orderBy: {
+              updatedAt: 'asc',
+            },
+            select: {
+              text: true,
+              updatedAt: true,
+            },
+          },
+          candidate: {
+            select: {
+              fullname: true,
+              position: true,
+              expectations: true,
+              country: true,
+              city: true,
+              experience: true,
+              english: true,
+              user: {
+                select: {
+                  email: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prismaService.offer.count({
+        where: {
+          employerId,
+          isFavorite: true,
+        },
+      }),
+    ]);
+
+    return {
+      offers,
+      count,
+    };
+  }
+
+  async moveOfferToFavorite(
+    employerId: string,
+    offerId: string,
+    moveOfferToFavoriteDto: MoveOfferToFavoriteDto,
+  ) {
+    const offer = await this.prismaService.offer.findUnique({
+      where: {
+        id: offerId,
+        employerId: employerId,
+        candidateId: moveOfferToFavoriteDto.candidateId,
+      },
+    });
+
+    if (!offer) throw new NotFoundException('Offer is not exists.');
+
+    if (offer.isArchive || !offer.active)
+      throw new ConflictException(
+        'Offer is already in favorite or not active.',
+      );
+
+    const { active, id, isArchive, isFavorite } =
+      await this.prismaService.offer.update({
+        where: {
+          id: offerId,
+        },
+        data: {
+          isFavorite: true,
+        },
+        select: {
+          active: true,
+          isArchive: true,
+          isFavorite: true,
+          id: true,
+        },
+      });
+
+    return {
+      success: true,
+      active,
+      isArchive,
+      isFavorite,
       offerId: id,
     };
   }

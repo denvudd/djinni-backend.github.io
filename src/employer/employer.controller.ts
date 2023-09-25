@@ -18,6 +18,7 @@ import { CreateOfferDto } from 'src/offer/dto/create-offer.dto';
 import { MoveOfferToArchiveDto } from 'src/offer/dto/move-offer-to-archive';
 import { ReplyOfferDto } from 'src/offer/dto/reply-offer.dto';
 import { RefuseOfferDto } from 'src/offer/dto/refuse-offer.dto';
+import { MoveOfferToFavoriteDto } from 'src/offer/dto/move-offer-to-favorite';
 
 @Controller('employer')
 export class EmployerController {
@@ -56,9 +57,15 @@ export class EmployerController {
   }
 
   @UseGuards(JwtGuard)
-  @Get(':id/offers/acrhive')
+  @Get(':id/offers/archive')
   getArchiveOffersByEmployerId(@Param('id') id: string) {
     return this.offerService.getArchiveOffersByEmployerId(id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Get(':id/offers/favorite')
+  getFavoriteOffersByEmployerId(@Param('id') id: string) {
+    return this.offerService.getFavoriteOffersByEmployerId(id);
   }
 
   @UseGuards(JwtGuard)
@@ -115,11 +122,24 @@ export class EmployerController {
     @Param('offerId') offerId: string,
     @Body() moveOfferToArchiveDto: MoveOfferToArchiveDto,
   ) {
-    console.log(employerId, offerId, moveOfferToArchiveDto);
     return this.offerService.moveOfferToArchive(
       employerId,
       offerId,
       moveOfferToArchiveDto,
+    );
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch(':id/offer/:offerId/favorite')
+  moveOfferToFavorite(
+    @Param('id') employerId: string,
+    @Param('offerId') offerId: string,
+    @Body() moveOfferToFavoriteDto: MoveOfferToFavoriteDto,
+  ) {
+    return this.offerService.moveOfferToFavorite(
+      employerId,
+      offerId,
+      moveOfferToFavoriteDto,
     );
   }
 

@@ -190,8 +190,11 @@ model Offer {
   candidateId String
   candidate   CandidateUser  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   replies     ReplyOnOffer[]
+
   active      Boolean        @default(true)
   isArchive   Boolean        @default(false)
+  isFavorite  Boolean        @default(false)
+
   refusal     OfferRefusal[]
 
   @@index([vacancyId])
