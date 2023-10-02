@@ -235,7 +235,6 @@ export class CandidateService {
     });
 
     return {
-      success: true,
       ...result,
     };
   }

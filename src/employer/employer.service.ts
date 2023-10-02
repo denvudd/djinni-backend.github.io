@@ -58,7 +58,6 @@ export class EmployerService {
     });
 
     return {
-      success: true,
       ...result,
     };
   }
