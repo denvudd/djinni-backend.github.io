@@ -119,13 +119,14 @@ model EmployerUser {
   companyLink        String?
   dou                String?
   phone              String?
-  aboutCompany       String?
+  aboutCompany       String? @db.VarChar(5000)
   filled             Boolean @default(false)
 
   vacancies          Vacancy[]
   offers             Offer[]
   refusals           OfferRefusal[]
   favoriteCandidates FavoriteCandidate[]
+  subscriptions      EmployerSubscribe[]
 }
 
 model FavoriteCandidate {
@@ -140,6 +141,26 @@ model FavoriteCandidate {
 
   @@index([employerId])
   @@index([candidateId])
+}
+
+model EmployerSubscribe {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category          String
+  experience        Int               @default(0)
+  salaryForkGte     Int?
+  salaryForkLte     Int?
+  english           EnglishLevel?
+  employmentOptions EmploymentOption?
+  locate            String?
+  keywords          String?
+
+  employerId String
+  employer   EmployerUser @relation(fields: [employerId], references: [id], onDelete: Cascade)
+
+  @@index([employerId])
 }
 
 model Vacancy {
@@ -191,11 +212,11 @@ model Offer {
   candidate   CandidateUser  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   replies     ReplyOnOffer[]
 
-  active      Boolean        @default(true)
-  isArchive   Boolean        @default(false)
-  isFavorite  Boolean        @default(false)
+  active     Boolean @default(true)
+  isArchive  Boolean @default(false)
+  isFavorite Boolean @default(false)
 
-  refusal     OfferRefusal[]
+  refusal OfferRefusal[]
 
   @@index([vacancyId])
   @@index([employerId])

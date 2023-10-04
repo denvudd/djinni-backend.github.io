@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UpdateEmployerDto } from './dto/update-employer.dto';
 import { PrismaService } from 'src/prisma.service';
+import { CreateSubscribeDto } from './dto/create-subscribe.dto';
 
 @Injectable()
 export class EmployerService {
@@ -85,7 +87,10 @@ export class EmployerService {
       },
     });
 
-    const result = await this.prisma.employerUser.update({
+    if (!favoriteCandidate)
+      throw new BadRequestException('Failed to add candidate to favorite.');
+
+    return await this.prisma.employerUser.update({
       where: {
         id,
       },
@@ -97,8 +102,6 @@ export class EmployerService {
         },
       },
     });
-
-    return result;
   }
 
   async removeCandidateFromFavorite(id: string, favoriteId: string) {
@@ -171,6 +174,69 @@ export class EmployerService {
       favoriteCandidates: favoriteCandidates.map((favoriteCandidate) => ({
         ...favoriteCandidate.candidate,
       })),
+    };
+  }
+
+  async createSubscribe(id: string, createSubscribeDto: CreateSubscribeDto) {
+    const employer = await this.prisma.employerUser.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+
+    const subscribe = await this.prisma.employerSubscribe.create({
+      data: {
+        employerId: id,
+        ...createSubscribeDto,
+      },
+    });
+
+    if (!subscribe)
+      throw new BadRequestException('Failed to create subscribe.');
+
+    return await this.prisma.employerUser.update({
+      where: {
+        id,
+      },
+      data: {
+        subscriptions: {
+          connect: {
+            id: subscribe.id,
+          },
+        },
+      },
+    });
+  }
+
+  async removeSubscribe(id: string, subscribeId: string) {
+    const employer = await this.prisma.employerUser.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    const subscribe = await this.prisma.employerSubscribe.findUnique({
+      where: {
+        id: subscribeId,
+        employerId: id,
+      },
+    });
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+    if (!subscribe) throw new NotFoundException('Subscribe is not exists.');
+
+    const result = await this.prisma.employerSubscribe.deleteMany({
+      where: {
+        id: subscribeId,
+        employerId: id,
+      },
+    });
+
+    return {
+      success: true,
+      deletedCound: result.count,
     };
   }
 

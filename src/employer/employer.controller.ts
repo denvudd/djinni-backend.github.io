@@ -19,6 +19,8 @@ import { MoveOfferToArchiveDto } from 'src/offer/dto/move-offer-to-archive';
 import { ReplyOfferDto } from 'src/offer/dto/reply-offer.dto';
 import { RefuseOfferDto } from 'src/offer/dto/refuse-offer.dto';
 import { MoveOfferToFavoriteDto } from 'src/offer/dto/move-offer-to-favorite';
+import { CreateSubscribeDto } from './dto/create-subscribe.dto';
+import { subscribe } from 'diagnostics_channel';
 
 @Controller('employer')
 export class EmployerController {
@@ -81,6 +83,15 @@ export class EmployerController {
   }
 
   @UseGuards(JwtGuard)
+  @Post(':id/subscribe')
+  createSubscribe(
+    @Param('id') id: string,
+    @Body() createSubscribeDto: CreateSubscribeDto,
+  ) {
+    return this.employerService.createSubscribe(id, createSubscribeDto);
+  }
+
+  @UseGuards(JwtGuard)
   @Post(':id/offer')
   createOffer(@Param('id') id: string, @Body() createOfferDto: CreateOfferDto) {
     return this.offerService.create(createOfferDto);
@@ -98,21 +109,6 @@ export class EmployerController {
       offerId,
       replyOfferDto,
     );
-  }
-
-  @UseGuards(JwtGuard)
-  @Delete(':id/offer/:offerId')
-  deleteOffer(@Param('id') id: string, @Param('offerId') offerId: string) {
-    return this.offerService.deleteOfferByEmployerId(id, offerId);
-  }
-
-  @UseGuards(JwtGuard)
-  @Delete(':id/candidate-to-favorite/:favoriteId')
-  removeCandidateFromFavorite(
-    @Param('id') id: string,
-    @Param('favoriteId') favoriteId: string,
-  ) {
-    return this.employerService.removeCandidateFromFavorite(id, favoriteId);
   }
 
   @UseGuards(JwtGuard)
@@ -160,6 +156,30 @@ export class EmployerController {
     @Body() updateEmployerDto: UpdateEmployerDto,
   ) {
     return this.employerService.update(id, updateEmployerDto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete(':id/subscribe/:subscribeId')
+  removeSubscribe(
+    @Param('id') id: string,
+    @Param('subscribeId') subscribeId: string,
+  ) {
+    return this.employerService.removeSubscribe(id, subscribeId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete(':id/candidate-to-favorite/:favoriteId')
+  removeCandidateFromFavorite(
+    @Param('id') id: string,
+    @Param('favoriteId') favoriteId: string,
+  ) {
+    return this.employerService.removeCandidateFromFavorite(id, favoriteId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete(':id/offer/:offerId')
+  deleteOffer(@Param('id') id: string, @Param('offerId') offerId: string) {
+    return this.offerService.deleteOfferByEmployerId(id, offerId);
   }
 
   // @Delete(':id')
