@@ -71,6 +71,12 @@ export class EmployerController {
   }
 
   @UseGuards(JwtGuard)
+  @Get(':id/subscriptions')
+  getSubscriptions(@Param('id') id: string) {
+    return this.employerService.getSubscriptions(id);
+  }
+
+  @UseGuards(JwtGuard)
   @Post(':id/candidate-to-favorite')
   addCandidateToFavorite(
     @Param('id') id: string,
