@@ -20,7 +20,6 @@ import { ReplyOfferDto } from 'src/offer/dto/reply-offer.dto';
 import { RefuseOfferDto } from 'src/offer/dto/refuse-offer.dto';
 import { MoveOfferToFavoriteDto } from 'src/offer/dto/move-offer-to-favorite';
 import { CreateSubscribeDto } from './dto/create-subscribe.dto';
-import { subscribe } from 'diagnostics_channel';
 
 @Controller('employer')
 export class EmployerController {
