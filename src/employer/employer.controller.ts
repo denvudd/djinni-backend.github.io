@@ -21,6 +21,8 @@ import { ReplyOfferDto } from 'src/offer/dto/reply-offer.dto';
 import { RefuseOfferDto } from 'src/offer/dto/refuse-offer.dto';
 import { MoveOfferToFavoriteDto } from 'src/offer/dto/move-offer-to-favorite.dto';
 import { CreateSubscribeDto } from './dto/create-subscribe.dto';
+import { CreateBillingDto } from './dto/create-billing.dto';
+import { UpdateBillingDto } from './dto/update-billing.dto';
 
 @Controller('employer')
 export class EmployerController {
@@ -115,6 +117,23 @@ export class EmployerController {
       offerId,
       replyOfferDto,
     );
+  }
+
+  @UseGuards(JwtGuard)
+  @Post(':id/billing')
+  createBilling(
+    @Param('id') id: string,
+    @Body() createBillingDto: CreateBillingDto,
+  ) {
+    return this.employerService.createBilling(id, createBillingDto);
+  }
+
+  @Patch(':id/billing')
+  updateBillingDto(
+    @Param('id') id: string,
+    @Body() updateBillingDto: UpdateBillingDto,
+  ) {
+    return this.employerService.updateBilling(id, updateBillingDto);
   }
 
   @UseGuards(JwtGuard)

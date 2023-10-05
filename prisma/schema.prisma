@@ -144,7 +144,7 @@ model EmployerBilling {
   firstStreet  String
   secondStreet String?
   city         String
-  postalCode   String
+  postalCode   Int
   vatId        String?
 
   employerId String       @unique

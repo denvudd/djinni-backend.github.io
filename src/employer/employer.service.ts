@@ -3,11 +3,14 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 import { UpdateEmployerDto } from './dto/update-employer.dto';
 import { CreateSubscribeDto } from './dto/create-subscribe.dto';
+import { CreateBillingDto } from './dto/create-billing.dto';
+import { UpdateBillingDto } from './dto/update-billing.dto';
 
 @Injectable()
 export class EmployerService {
@@ -165,6 +168,52 @@ export class EmployerService {
             id: subscribe.id,
           },
         },
+      },
+    });
+  }
+
+  async createBilling(employerId: string, createBillingDto: CreateBillingDto) {
+    const employer = await this.checkEmployerExists(employerId);
+    const billing = await this.prisma.employerBilling.findUnique({
+      where: {
+        employerId,
+      },
+    });
+
+    if (!employer) throw new NotFoundException('This employer is not exists.');
+    if (billing)
+      throw new ConflictException(
+        'This employer already have a created billing.',
+      );
+
+    return await this.prisma.employerBilling.create({
+      data: {
+        ...createBillingDto,
+        employerId,
+      },
+    });
+  }
+
+  async updateBilling(employerId: string, updateBillingDto: UpdateBillingDto) {
+    const employer = await this.checkEmployerExists(employerId);
+    const billing = await this.prisma.employerBilling.findUnique({
+      where: {
+        employerId,
+      },
+    });
+
+    if (!employer) throw new NotFoundException('This employer is not exists.');
+    if (!billing)
+      throw new ConflictException(
+        "This employer doesn't have created billing.",
+      );
+
+    return await this.prisma.employerBilling.update({
+      where: {
+        employerId,
+      },
+      data: {
+        ...updateBillingDto,
       },
     });
   }
