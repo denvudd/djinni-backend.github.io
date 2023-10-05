@@ -5,8 +5,13 @@ import { CountriesService } from './countries.service';
 export class CountriesController {
   constructor(private readonly countriesService: CountriesService) {}
 
+  @Get('/countries')
+  findCountries() {
+    return this.countriesService.findAllCountries();
+  }
+
   @Get()
-  findAll() {
+  findUkrainianCities() {
     return this.countriesService.findUkrainianCities();
   }
 
