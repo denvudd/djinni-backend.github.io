@@ -127,6 +127,30 @@ model EmployerUser {
   refusals           OfferRefusal[]
   favoriteCandidates FavoriteCandidate[]
   subscriptions      EmployerSubscribe[]
+  billing            EmployerBilling?
+}
+
+model EmployerBilling {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  firstName    String
+  lastName     String
+  email        String
+  phone        String
+  country      String
+  company      String?
+  firstStreet  String
+  secondStreet String?
+  city         String
+  postalCode   String
+  vatId        String?
+
+  employerId String       @unique
+  employer   EmployerUser @relation(fields: [employerId], references: [id], onDelete: Cascade)
+
+  @@index([employerId])
 }
 
 model FavoriteCandidate {

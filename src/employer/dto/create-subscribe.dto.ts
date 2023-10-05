@@ -1,11 +1,5 @@
 import { EmploymentOption, EnglishLevel } from '@prisma/client';
-import {
-  IsBoolean,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateSubscribeDto {
   @IsString()

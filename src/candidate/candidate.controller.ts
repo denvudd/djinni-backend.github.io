@@ -9,12 +9,14 @@ import {
   Query,
   Delete,
 } from '@nestjs/common';
-import { CandidateService } from './candidate.service';
-import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { OfferService } from 'src/offer/offer.service';
+import { CandidateService } from './candidate.service';
+
+import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { SkillCreateDto } from './dto/create-skill.dto';
 import { CadidatesListQueryDto } from './dto/candidates-list.dto';
+
 @Controller('candidate')
 export class CandidateController {
   constructor(

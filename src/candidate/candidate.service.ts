@@ -4,11 +4,12 @@ import {
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
-import { CandidateUpdateDto } from './dto/update-candidate.dto';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
+
+import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { SkillCreateDto } from './dto/create-skill.dto';
 import { CadidatesListQueryDto } from './dto/candidates-list.dto';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CandidateService {

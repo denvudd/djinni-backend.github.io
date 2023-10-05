@@ -5,6 +5,7 @@ import { UserService } from 'src/user/user.service';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { CandidateService } from 'src/candidate/candidate.service';
+
 @Module({
   controllers: [AuthController],
   providers: [

@@ -8,56 +8,6 @@ import { Prisma } from '@prisma/client';
 @Injectable()
 export class VacancyService {
   constructor(private prismaService: PrismaService) {}
-  async create(createVacancyDto: CreateVacancyDto) {
-    const { employerId, clarifiedData, keywords, ...rest } = createVacancyDto;
-
-    const vacancy = await this.prismaService.vacancy.create({
-      data: {
-        clarifiedData: {
-          create: clarifiedData.map((name) => ({
-            name,
-          })),
-        },
-        keywords: {
-          create: keywords.map((name) => ({
-            name,
-          })),
-        },
-        employer: {
-          connect: {
-            id: employerId,
-          },
-        },
-        ...rest,
-      },
-      include: {
-        clarifiedData: true,
-        keywords: {
-          select: {
-            name: true,
-            id: true,
-          },
-        },
-        employer: {
-          select: {
-            fullname: true,
-            id: true,
-            positionAndCompany: true,
-            companyLink: true,
-            linkedIn: true,
-            telegram: true,
-            user: {
-              select: {
-                email: true,
-                avatar: true,
-              },
-            },
-          },
-        },
-      },
-    });
-    return vacancy;
-  }
 
   async getListOfVacancies(queryParams: VacanciesListQueryDto) {
     const {
@@ -148,6 +98,77 @@ export class VacancyService {
         avatar: employer.user[0].avatar,
       },
     };
+  }
+
+  async getDrafts(id: string) {
+    return await this.prismaService.vacancy.findMany({
+      where: {
+        employerId: id,
+        active: false,
+      },
+    });
+  }
+
+  async create(createVacancyDto: CreateVacancyDto) {
+    const { employerId, clarifiedData, keywords, ...rest } = createVacancyDto;
+
+    const vacancy = await this.prismaService.vacancy.create({
+      data: {
+        clarifiedData: {
+          create: clarifiedData.map((name) => ({
+            name,
+          })),
+        },
+        keywords: {
+          create: keywords.map((name) => ({
+            name,
+          })),
+        },
+        employer: {
+          connect: {
+            id: employerId,
+          },
+        },
+        ...rest,
+      },
+      include: {
+        clarifiedData: true,
+        keywords: {
+          select: {
+            name: true,
+            id: true,
+          },
+        },
+        employer: {
+          select: {
+            fullname: true,
+            id: true,
+            positionAndCompany: true,
+            companyLink: true,
+            linkedIn: true,
+            telegram: true,
+            user: {
+              select: {
+                email: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return vacancy;
+  }
+
+  async addToDraft(id: string) {
+    return await this.prismaService.vacancy.update({
+      where: {
+        id,
+      },
+      data: {
+        active: false,
+      },
+    });
   }
 
   async update(id: string, updateVacancyDto: UpdateVacancyDto) {
@@ -262,17 +283,6 @@ export class VacancyService {
     return updatedVacancy;
   }
 
-  async addToDraft(id: string) {
-    return await this.prismaService.vacancy.update({
-      where: {
-        id,
-      },
-      data: {
-        active: false,
-      },
-    });
-  }
-
   async removeFromDraft(id: string) {
     return await this.prismaService.vacancy.update({
       where: {
@@ -280,15 +290,6 @@ export class VacancyService {
       },
       data: {
         active: true,
-      },
-    });
-  }
-
-  async getDrafts(id: string) {
-    return await this.prismaService.vacancy.findMany({
-      where: {
-        employerId: id,
-        active: false,
       },
     });
   }

@@ -3,17 +3,420 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service';
+
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
-import { PrismaService } from 'src/prisma.service';
 import { ReplyOfferDto } from './dto/reply-offer.dto';
-import { MoveOfferToArchiveDto } from './dto/move-offer-to-archive';
+import { MoveOfferToArchiveDto } from './dto/move-offer-to-archive.dto';
 import { RefuseOfferDto } from './dto/refuse-offer.dto';
-import { MoveOfferToFavoriteDto } from './dto/move-offer-to-favorite';
+import { MoveOfferToFavoriteDto } from './dto/move-offer-to-favorite.dto';
 
 @Injectable()
 export class OfferService {
   constructor(private prismaService: PrismaService) {}
+  private async checkCandidateExists(candidateId: string) {
+    return await this.prismaService.candidateUser.findUnique({
+      where: {
+        id: candidateId,
+      },
+    });
+  }
+  private async checkEmployerExists(employerId: string) {
+    return await this.prismaService.employerUser.findUnique({
+      where: {
+        id: employerId,
+      },
+    });
+  }
+
+  async findOne(id: string) {
+    return await this.prismaService.offer.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        vacancy: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            domain: true,
+          },
+        },
+        replies: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+          include: {
+            author: {
+              select: {
+                email: true,
+                avatar: true,
+                role: true,
+                id: true,
+                employer_info: {
+                  select: {
+                    id: true,
+                    fullname: true,
+                  },
+                },
+                candidate_info: {
+                  select: {
+                    id: true,
+                    fullname: true,
+                  },
+                },
+              },
+            },
+            replyTo: true,
+            replies: true,
+          },
+        },
+        employer: {
+          select: {
+            fullname: true,
+            companyLink: true,
+            positionAndCompany: true,
+            telegram: true,
+            linkedIn: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+        candidate: {
+          select: {
+            fullname: true,
+            city: true,
+            country: true,
+            category: true,
+            english: true,
+            experience: true,
+            expectations: true,
+            position: true,
+            preferableLang: true,
+            communicateMethod: true,
+            skype: true,
+            github: true,
+            linkedIn: true,
+            telegram: true,
+            whatsApp: true,
+            user: {
+              select: {
+                id: true,
+                avatar: true,
+                email: true,
+              },
+            },
+          },
+        },
+        refusal: {
+          select: {
+            createdAt: true,
+            reason: true,
+            message: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getOffersByCandidateId(candidateId: string) {
+    const candidate = await this.checkCandidateExists(candidateId);
+
+    if (!candidate) throw new NotFoundException('Candidate is not exists.');
+
+    const [offers, count] = await Promise.all([
+      this.prismaService.offer.findMany({
+        where: {
+          candidateId,
+          active: true,
+          isArchive: false,
+        },
+        include: {
+          vacancy: {
+            select: {
+              name: true,
+              companyType: true,
+              employmentOptions: true,
+              employer: {
+                select: {
+                  positionAndCompany: true,
+                  companyName: true,
+                  user: {
+                    select: {
+                      avatar: true,
+                      createdAt: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prismaService.offer.count({
+        where: {
+          candidateId,
+        },
+      }),
+    ]);
+
+    return {
+      offers,
+      count,
+    };
+  }
+
+  async getOffersByEmployerId(employerId: string) {
+    const employer = await this.checkEmployerExists(employerId);
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+
+    const [offers, count] = await Promise.all([
+      this.prismaService.offer.findMany({
+        where: {
+          employerId,
+          active: true,
+          isArchive: false,
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        include: {
+          replies: {
+            orderBy: {
+              updatedAt: 'asc',
+            },
+            select: {
+              text: true,
+              updatedAt: true,
+            },
+          },
+          candidate: {
+            select: {
+              fullname: true,
+              position: true,
+              expectations: true,
+              country: true,
+              city: true,
+              experience: true,
+              english: true,
+              user: {
+                select: {
+                  email: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prismaService.offer.count({
+        where: {
+          employerId,
+          active: true,
+          isArchive: false,
+        },
+      }),
+    ]);
+
+    return {
+      offers,
+      count,
+    };
+  }
+
+  async getArchiveOffersByEmployerId(employerId: string) {
+    const employer = await this.checkEmployerExists(employerId);
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+
+    const [offers, count] = await Promise.all([
+      this.prismaService.offer.findMany({
+        where: {
+          employerId,
+          active: false,
+          isArchive: true,
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        include: {
+          refusal: true,
+          replies: {
+            orderBy: {
+              updatedAt: 'asc',
+            },
+            select: {
+              text: true,
+              updatedAt: true,
+            },
+          },
+          candidate: {
+            select: {
+              fullname: true,
+              position: true,
+              expectations: true,
+              country: true,
+              city: true,
+              experience: true,
+              english: true,
+              user: {
+                select: {
+                  email: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prismaService.offer.count({
+        where: {
+          employerId,
+          active: false,
+          isArchive: true,
+        },
+      }),
+    ]);
+
+    return {
+      offers,
+      count,
+    };
+  }
+
+  async getFavoriteOffersByEmployerId(employerId: string) {
+    const employer = await this.checkEmployerExists(employerId);
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+
+    const [offers, count] = await Promise.all([
+      this.prismaService.offer.findMany({
+        where: {
+          employerId,
+          isFavorite: true,
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        include: {
+          refusal: true,
+          replies: {
+            orderBy: {
+              updatedAt: 'asc',
+            },
+            select: {
+              text: true,
+              updatedAt: true,
+            },
+          },
+          candidate: {
+            select: {
+              fullname: true,
+              position: true,
+              expectations: true,
+              country: true,
+              city: true,
+              experience: true,
+              english: true,
+              user: {
+                select: {
+                  email: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prismaService.offer.count({
+        where: {
+          employerId,
+          isFavorite: true,
+        },
+      }),
+    ]);
+
+    return {
+      offers,
+      count,
+    };
+  }
+
+  async replyToOfferAsEmployer(
+    employerId: string,
+    offerId: string,
+    replyToOfferDto: ReplyOfferDto,
+  ) {
+    const [employer, offer, reply] = await this.prismaService.$transaction([
+      this.prismaService.employerUser.findUnique({
+        where: {
+          id: employerId,
+        },
+        select: {
+          id: true,
+        },
+      }),
+      this.prismaService.offer.findUnique({
+        where: {
+          id: offerId,
+        },
+      }),
+      this.prismaService.offer.findUnique({
+        where: {
+          id: offerId,
+        },
+      }),
+    ]);
+
+    if (!employer) throw new NotFoundException('Employer is not exists.');
+    if (!offer) throw new NotFoundException('Offer is not exists.');
+    if (!reply) throw new NotFoundException('Reply is not exists.');
+
+    // update updatedAt offer before create reply for sorting offers by new replies
+    return await Promise.all([
+      this.prismaService.offer.update({
+        where: {
+          id: offerId,
+        },
+        data: {
+          updatedAt: new Date(),
+        },
+      }),
+      this.prismaService.replyOnOffer.create({
+        data: {
+          offerId,
+          ...replyToOfferDto,
+        },
+        include: {
+          author: {
+            select: {
+              avatar: true,
+              candidate_info: {
+                select: {
+                  fullname: true,
+                },
+              },
+              employer_info: {
+                select: {
+                  fullname: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+  }
+
   async create(createOfferDto: CreateOfferDto) {
     const candidate = await this.prismaService.candidateUser.findUnique({
       where: {
@@ -78,185 +481,6 @@ export class OfferService {
     return offer;
   }
 
-  async getOffersByCandidateId(candidateId: string) {
-    const candidate = await this.prismaService.candidateUser.findUnique({
-      where: {
-        id: candidateId,
-      },
-    });
-
-    if (!candidate) throw new NotFoundException('Candidate is not exists.');
-
-    const [offers, count] = await Promise.all([
-      this.prismaService.offer.findMany({
-        where: {
-          candidateId,
-          active: true,
-          isArchive: false,
-        },
-        include: {
-          vacancy: {
-            select: {
-              name: true,
-              companyType: true,
-              employmentOptions: true,
-              employer: {
-                select: {
-                  positionAndCompany: true,
-                  companyName: true,
-                  user: {
-                    select: {
-                      avatar: true,
-                      createdAt: true,
-                      email: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      }),
-      this.prismaService.offer.count({
-        where: {
-          candidateId,
-        },
-      }),
-    ]);
-
-    return {
-      offers,
-      count,
-    };
-  }
-
-  async getOffersByEmployerId(employerId: string) {
-    const employer = await this.prismaService.employerUser.findUnique({
-      where: {
-        id: employerId,
-      },
-    });
-
-    if (!employer) throw new NotFoundException('Employer is not exists.');
-
-    const [offers, count] = await Promise.all([
-      this.prismaService.offer.findMany({
-        where: {
-          employerId,
-          active: true,
-          isArchive: false,
-        },
-        orderBy: {
-          updatedAt: 'desc',
-        },
-        include: {
-          replies: {
-            orderBy: {
-              updatedAt: 'asc',
-            },
-            select: {
-              text: true,
-              updatedAt: true,
-            },
-          },
-          candidate: {
-            select: {
-              fullname: true,
-              position: true,
-              expectations: true,
-              country: true,
-              city: true,
-              experience: true,
-              english: true,
-              user: {
-                select: {
-                  email: true,
-                  avatar: true,
-                },
-              },
-            },
-          },
-        },
-      }),
-      this.prismaService.offer.count({
-        where: {
-          employerId,
-          active: true,
-          isArchive: false,
-        },
-      }),
-    ]);
-
-    return {
-      offers,
-      count,
-    };
-  }
-
-  async getArchiveOffersByEmployerId(employerId: string) {
-    const employer = await this.prismaService.employerUser.findUnique({
-      where: {
-        id: employerId,
-      },
-    });
-
-    if (!employer) throw new NotFoundException('Employer is not exists.');
-
-    const [offers, count] = await Promise.all([
-      this.prismaService.offer.findMany({
-        where: {
-          employerId,
-          active: false,
-          isArchive: true,
-        },
-        orderBy: {
-          updatedAt: 'desc',
-        },
-        include: {
-          refusal: true,
-          replies: {
-            orderBy: {
-              updatedAt: 'asc',
-            },
-            select: {
-              text: true,
-              updatedAt: true,
-            },
-          },
-          candidate: {
-            select: {
-              fullname: true,
-              position: true,
-              expectations: true,
-              country: true,
-              city: true,
-              experience: true,
-              english: true,
-              user: {
-                select: {
-                  email: true,
-                  avatar: true,
-                },
-              },
-            },
-          },
-        },
-      }),
-      this.prismaService.offer.count({
-        where: {
-          employerId,
-          active: false,
-          isArchive: true,
-        },
-      }),
-    ]);
-
-    return {
-      offers,
-      count,
-    };
-  }
-
   async moveOfferToArchive(
     employerId: string,
     offerId: string,
@@ -298,68 +522,6 @@ export class OfferService {
       isArchive,
       isFavorite,
       offerId: id,
-    };
-  }
-
-  async getFavoriteOffersByEmployerId(employerId: string) {
-    const employer = await this.prismaService.employerUser.findUnique({
-      where: {
-        id: employerId,
-      },
-    });
-
-    if (!employer) throw new NotFoundException('Employer is not exists.');
-
-    const [offers, count] = await Promise.all([
-      this.prismaService.offer.findMany({
-        where: {
-          employerId,
-          isFavorite: true,
-        },
-        orderBy: {
-          updatedAt: 'desc',
-        },
-        include: {
-          refusal: true,
-          replies: {
-            orderBy: {
-              updatedAt: 'asc',
-            },
-            select: {
-              text: true,
-              updatedAt: true,
-            },
-          },
-          candidate: {
-            select: {
-              fullname: true,
-              position: true,
-              expectations: true,
-              country: true,
-              city: true,
-              experience: true,
-              english: true,
-              user: {
-                select: {
-                  email: true,
-                  avatar: true,
-                },
-              },
-            },
-          },
-        },
-      }),
-      this.prismaService.offer.count({
-        where: {
-          employerId,
-          isFavorite: true,
-        },
-      }),
-    ]);
-
-    return {
-      offers,
-      count,
     };
   }
 
@@ -490,102 +652,6 @@ export class OfferService {
     };
   }
 
-  async findOne(id: string) {
-    return await this.prismaService.offer.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        vacancy: {
-          select: {
-            id: true,
-            createdAt: true,
-            updatedAt: true,
-            domain: true,
-          },
-        },
-        replies: {
-          orderBy: {
-            createdAt: 'asc',
-          },
-          include: {
-            author: {
-              select: {
-                email: true,
-                avatar: true,
-                role: true,
-                id: true,
-                employer_info: {
-                  select: {
-                    id: true,
-                    fullname: true,
-                  },
-                },
-                candidate_info: {
-                  select: {
-                    id: true,
-                    fullname: true,
-                  },
-                },
-              },
-            },
-            replyTo: true,
-            replies: true,
-          },
-        },
-        employer: {
-          select: {
-            fullname: true,
-            companyLink: true,
-            positionAndCompany: true,
-            telegram: true,
-            linkedIn: true,
-            user: {
-              select: {
-                id: true,
-                email: true,
-                avatar: true,
-              },
-            },
-          },
-        },
-        candidate: {
-          select: {
-            fullname: true,
-            city: true,
-            country: true,
-            category: true,
-            english: true,
-            experience: true,
-            expectations: true,
-            position: true,
-            preferableLang: true,
-            communicateMethod: true,
-            skype: true,
-            github: true,
-            linkedIn: true,
-            telegram: true,
-            whatsApp: true,
-            user: {
-              select: {
-                id: true,
-                avatar: true,
-                email: true,
-              },
-            },
-          },
-        },
-        refusal: {
-          select: {
-            createdAt: true,
-            reason: true,
-            message: true,
-          },
-        },
-      },
-    });
-  }
-
   async update(id: string, updateOfferDto: UpdateOfferDto) {
     return await this.prismaService.offer.update({
       where: {
@@ -636,72 +702,6 @@ export class OfferService {
         },
       },
     });
-  }
-
-  async replyToOfferAsEmployer(
-    employerId: string,
-    offerId: string,
-    replyToOfferDto: ReplyOfferDto,
-  ) {
-    const [employer, offer, reply] = await this.prismaService.$transaction([
-      this.prismaService.employerUser.findUnique({
-        where: {
-          id: employerId,
-        },
-        select: {
-          id: true,
-        },
-      }),
-      this.prismaService.offer.findUnique({
-        where: {
-          id: offerId,
-        },
-      }),
-      this.prismaService.offer.findUnique({
-        where: {
-          id: offerId,
-        },
-      }),
-    ]);
-
-    if (!employer) throw new NotFoundException('Employer is not exists.');
-    if (!offer) throw new NotFoundException('Offer is not exists.');
-    if (!reply) throw new NotFoundException('Reply is not exists.');
-
-    // update updatedAt offer before create reply for sorting offers by new replies
-    return await Promise.all([
-      this.prismaService.offer.update({
-        where: {
-          id: offerId,
-        },
-        data: {
-          updatedAt: new Date(),
-        },
-      }),
-      this.prismaService.replyOnOffer.create({
-        data: {
-          offerId,
-          ...replyToOfferDto,
-        },
-        include: {
-          author: {
-            select: {
-              avatar: true,
-              candidate_info: {
-                select: {
-                  fullname: true,
-                },
-              },
-              employer_info: {
-                select: {
-                  fullname: true,
-                },
-              },
-            },
-          },
-        },
-      }),
-    ]);
   }
 
   // remove(id: number) {
