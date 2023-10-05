@@ -1,32 +1,25 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common/decorators';
 import { OfferService } from './offer.service';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
+
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
-import { JwtGuard } from 'src/auth/guards/jwt.guard';
-import { UseGuards } from '@nestjs/common/decorators';
 
 @Controller('offer')
 export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
   @UseGuards(JwtGuard)
-  @Post()
-  create(@Body() createOfferDto: CreateOfferDto) {
-    return this.offerService.create(createOfferDto);
-  }
-
-  @UseGuards(JwtGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.offerService.findOne(id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post()
+  create(@Body() createOfferDto: CreateOfferDto) {
+    return this.offerService.create(createOfferDto);
   }
 
   @UseGuards(JwtGuard)

@@ -3,78 +3,14 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
+import { hash } from 'bcrypt';
+
 import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/createUser.dto';
-import { hash } from 'bcrypt';
 import { UpdateUserDto } from './dto/updateUserDto.dto';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
-
-  async create(dto: CreateUserDto) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: dto.email,
-        role: dto.role,
-      },
-    });
-
-    if (user)
-      throw new ConflictException('User with this email already created');
-
-    const newUser = await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        password: await hash(dto.password, 10),
-        role: dto.role,
-      },
-    });
-
-    if (dto.role === 'Candidate') {
-      const candidate = await this.prisma.candidateUser.create({
-        data: {
-          userId: newUser.id,
-          user: {
-            connect: {
-              id: newUser.id,
-            },
-          },
-          english: 'NoEnglish',
-          country: 'Ukraine',
-          employmentOptions: 'Remote',
-          communicateMethod: 'Djinni',
-          preferableLang: 'Ukrainian',
-          filled: false,
-          views: 0,
-        },
-      });
-
-      const { password, ...result } = newUser;
-
-      return {
-        ...result,
-        candidateId: candidate.id,
-      };
-    } else {
-      const employer = await this.prisma.employerUser.create({
-        data: {
-          userId: newUser.id,
-          user: {
-            connect: {
-              id: newUser.id,
-            },
-          },
-        },
-      });
-
-      const { password, ...result } = newUser;
-
-      return {
-        ...result,
-        employerId: employer.id,
-      };
-    }
-  }
 
   async findUserByEmail(email: string) {
     return await this.prisma.user.findUnique({
@@ -138,6 +74,71 @@ export class UserService {
         ...result,
         employer_id: employer_info[0].id,
         filled: user.employer_info[0].filled,
+      };
+    }
+  }
+
+  async create(dto: CreateUserDto) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+        role: dto.role,
+      },
+    });
+
+    if (user)
+      throw new ConflictException('User with this email already created');
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        password: await hash(dto.password, 10),
+        role: dto.role,
+      },
+    });
+
+    if (dto.role === 'Candidate') {
+      const candidate = await this.prisma.candidateUser.create({
+        data: {
+          userId: newUser.id,
+          user: {
+            connect: {
+              id: newUser.id,
+            },
+          },
+          english: 'NoEnglish',
+          country: 'Ukraine',
+          employmentOptions: 'Remote',
+          communicateMethod: 'Djinni',
+          preferableLang: 'Ukrainian',
+          filled: false,
+          views: 0,
+        },
+      });
+
+      const { password, ...result } = newUser;
+
+      return {
+        ...result,
+        candidateId: candidate.id,
+      };
+    } else {
+      const employer = await this.prisma.employerUser.create({
+        data: {
+          userId: newUser.id,
+          user: {
+            connect: {
+              id: newUser.id,
+            },
+          },
+        },
+      });
+
+      const { password, ...result } = newUser;
+
+      return {
+        ...result,
+        employerId: employer.id,
       };
     }
   }
