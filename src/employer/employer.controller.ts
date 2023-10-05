@@ -79,6 +79,12 @@ export class EmployerController {
   }
 
   @UseGuards(JwtGuard)
+  @Get(':id/billing')
+  getBilling(@Param('id') id: string) {
+    return this.employerService.getBilling(id);
+  }
+
+  @UseGuards(JwtGuard)
   @Post(':id/candidate-to-favorite')
   addCandidateToFavorite(
     @Param('id') id: string,

@@ -64,6 +64,22 @@ export class EmployerService {
     return employer.subscriptions;
   }
 
+  async getBilling(employerId: string) {
+    const employer = await this.prisma.employerUser.findUnique({
+      where: {
+        id: employerId,
+      },
+      select: {
+        billing: true,
+      },
+    });
+
+    if (!employer)
+      throw new UnauthorizedException('This employer is not exists.');
+
+    return employer.billing;
+  }
+
   async getFavoriteCandidates(id: string) {
     const employer = await this.prisma.employerUser.findUnique({
       where: {

@@ -19,14 +19,14 @@ export class CreateBillingDto {
 
   @IsString()
   @IsOptional()
-  company: string;
+  company?: string;
 
   @IsString()
   firstStreet: string;
 
   @IsString()
   @IsOptional()
-  secondStreet: string;
+  secondStreet?: string;
 
   @IsString()
   city: string;
@@ -36,5 +36,5 @@ export class CreateBillingDto {
 
   @IsString()
   @IsOptional()
-  vatId: string;
+  vatId?: string;
 }
