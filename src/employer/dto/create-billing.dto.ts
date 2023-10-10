@@ -4,7 +4,7 @@ export class CreateBillingDto {
   @IsString()
   firstName: string;
 
-  @IsNumber()
+  @IsString()
   lastName: string;
 
   @IsString()
