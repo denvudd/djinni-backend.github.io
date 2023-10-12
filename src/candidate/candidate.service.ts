@@ -116,6 +116,9 @@ export class CandidateService {
       where: {
         id,
       },
+      include: {
+        skills: true,
+      },
     });
 
     if (!candidate)
