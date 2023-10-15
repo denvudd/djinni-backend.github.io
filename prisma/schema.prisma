@@ -70,26 +70,7 @@ model CandidateUser {
   offers             Offer[]
   refusals           OfferRefusal[]
   favoriteCandidates FavoriteCandidate[]
-}
-
-model BlockedDomain {
-  id   String @id @default(cuid())
-  name String
-
-  candidateId String?
-  candidate   CandidateUser? @relation("BlockedDomainToCandidate", fields: [candidateId], references: [id])
-
-  @@index([candidateId])
-}
-
-model BlockedVacancyType {
-  id   String @id @default(cuid())
-  name String
-
-  candidateId String?
-  candidate   CandidateUser? @relation("BlockedVacancyTypeToCandidate", fields: [candidateId], references: [id])
-
-  @@index([candidateId])
+  favoriteVacancies  FavoriteVacancy[]
 }
 
 model CandidateSkill {
@@ -153,20 +134,6 @@ model EmployerBilling {
   @@index([employerId])
 }
 
-model FavoriteCandidate {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  employerId  String
-  employer    EmployerUser  @relation(fields: [employerId], references: [id], onDelete: Cascade)
-  candidateId String
-  candidate   CandidateUser @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-
-  @@index([employerId])
-  @@index([candidateId])
-}
-
 model EmployerSubscribe {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
@@ -187,12 +154,28 @@ model EmployerSubscribe {
   @@index([employerId])
 }
 
+model FavoriteCandidate {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employerId  String
+  employer    EmployerUser  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  candidateId String
+  candidate   CandidateUser @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([employerId])
+  @@index([candidateId])
+}
+
 model Vacancy {
-  id             String   @id @default(cuid())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  active         Boolean  @default(false)
-  responsesCount Int      @default(0)
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  active         Boolean @default(false)
+  responsesCount Int     @default(0)
+  views          Int?    @default(0)
 
   name                 String
   domain               String
@@ -216,9 +199,24 @@ model Vacancy {
   employerId String
   employer   EmployerUser @relation(fields: [employerId], references: [id], onDelete: Cascade)
 
-  offers Offer[]
+  offers            Offer[]
+  favoriteVacancies FavoriteVacancy[]
 
   @@index([employerId])
+}
+
+model FavoriteVacancy {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  candidateId String
+  candidate   CandidateUser @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  vacancyId   String
+  vacancy     Vacancy       @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId])
+  @@index([vacancyId])
 }
 
 model Offer {
@@ -295,6 +293,26 @@ model VacancyKeyword {
   vacancy   Vacancy @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
 
   @@index([vacancyId])
+}
+
+model BlockedDomain {
+  id   String @id @default(cuid())
+  name String
+
+  candidateId String?
+  candidate   CandidateUser? @relation("BlockedDomainToCandidate", fields: [candidateId], references: [id])
+
+  @@index([candidateId])
+}
+
+model BlockedVacancyType {
+  id   String @id @default(cuid())
+  name String
+
+  candidateId String?
+  candidate   CandidateUser? @relation("BlockedVacancyTypeToCandidate", fields: [candidateId], references: [id])
+
+  @@index([candidateId])
 }
 
 model ClarifiedData {

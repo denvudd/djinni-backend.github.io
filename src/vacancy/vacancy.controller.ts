@@ -22,6 +22,11 @@ export class VacancyController {
     return this.vacancyService.findOneById(id);
   }
 
+  @Get(':id/public')
+  findPublicOne(@Param('id') id: string) {
+    return this.vacancyService.findOneByIdPublic(id);
+  }
+
   @UseGuards(JwtGuard)
   @Post()
   create(@Body() createVacancyDto: CreateVacancyDto) {

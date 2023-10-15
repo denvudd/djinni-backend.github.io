@@ -3,6 +3,15 @@ import { IsNumber, IsOptional } from 'class-validator';
 import { toLowerCase, toNumber } from '../../common/helper/cast.helper';
 import { ApiProperty } from '@nestjs/swagger/dist';
 import { EmploymentOption, EnglishLevel } from 'src/enums/candidate.enum';
+import { CompanyType } from '@prisma/client';
+
+enum ExpRank {
+  Junior = 'Junior',
+  Middle = 'Middle',
+  Senior = 'Senior',
+  TeamLead = 'Team Lead',
+  Chief = 'Chief / Head of',
+}
 
 export class VacanciesListQueryDto {
   @ApiProperty({
@@ -30,16 +39,16 @@ export class VacanciesListQueryDto {
   @Transform(({ value }) => toNumber(value, { default: 1, min: 1 }))
   @IsNumber()
   @IsOptional()
-  exp_from: number;
+  exp_level: number;
 
   @ApiProperty({
-    description: 'number of experience (max) of vacancy',
+    description: 'experience level of vacancy',
     required: false,
+    enum: ExpRank,
   })
-  @Transform(({ value }) => toNumber(value, { default: 1, min: 1 }))
-  @IsNumber()
+  @Transform(({ value }) => toLowerCase(value))
   @IsOptional()
-  exp_to: number;
+  exp_rank: ExpRank;
 
   @ApiProperty({
     description: 'number of salary (min) of vacancy',
@@ -48,23 +57,21 @@ export class VacanciesListQueryDto {
   @Transform(({ value }) => toNumber(value, { default: 1, min: 1 }))
   @IsNumber()
   @IsOptional()
-  salary_min: number;
+  salary: number;
 
   @ApiProperty({
-    description: 'number of salary (max) of vacancy',
-    required: false,
-  })
-  @Transform(({ value }) => toNumber(value, { default: 1, min: 1 }))
-  @IsNumber()
-  @IsOptional()
-  salary_max: number;
-
-  @ApiProperty({
-    description: 'title for categories of vacancy',
+    description: 'category of vacancy',
     required: false,
   })
   @IsOptional()
   title: string;
+
+  @ApiProperty({
+    description: 'city of vacancy',
+    required: false,
+  })
+  @IsOptional()
+  location: string;
 
   @ApiProperty({
     description: 'keywords for search of vacancy',
@@ -72,7 +79,7 @@ export class VacanciesListQueryDto {
   })
   @Transform(({ value }) => toLowerCase(value))
   @IsOptional()
-  keywords: string;
+  primary_keyword: string;
 
   @ApiProperty({
     description: 'english level of vacancy',
@@ -89,4 +96,12 @@ export class VacanciesListQueryDto {
   })
   @IsOptional()
   employment_options: EmploymentOption;
+
+  @ApiProperty({
+    description: 'company type of vacancy',
+    required: false,
+    enum: CompanyType,
+  })
+  @IsOptional()
+  company_type: CompanyType;
 }

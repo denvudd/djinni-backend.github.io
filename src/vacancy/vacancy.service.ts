@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ClarifiedDataEnum, CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -9,38 +14,54 @@ import { Prisma } from '@prisma/client';
 export class VacancyService {
   constructor(private prismaService: PrismaService) {}
 
+  private async checkVacancyExist(id: string) {
+    return await this.prismaService.vacancy.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
   async getListOfVacancies(queryParams: VacanciesListQueryDto) {
     const {
-      page,
-      limit,
-      exp_from,
-      exp_to,
-      salary_min,
-      salary_max,
-      title,
-      keywords,
-      english_level,
+      company_type,
       employment_options,
+      english_level,
+      exp_level,
+      limit,
+      page,
+      primary_keyword,
+      salary,
+      title,
+      location,
+      exp_rank,
     } = queryParams;
 
     const filter: Prisma.VacancyWhereInput = {
-      experience: {
-        gte: exp_from,
-        lte: exp_to,
+      experience: exp_level,
+      salaryForkGte: {
+        gte: salary,
       },
-      salaryForkGte: salary_min,
-      salaryForkLte: salary_max,
+      active: true,
     };
 
     if (title) {
       filter.category = title;
     }
 
-    if (keywords) {
+    if (location) {
+      filter.city = location;
+    }
+
+    if (primary_keyword || exp_rank) {
       filter.OR = [
-        { name: { contains: keywords } },
-        { description: { contains: keywords } },
+        { name: { contains: primary_keyword || exp_rank } },
+        { description: { contains: primary_keyword || exp_rank } },
       ];
+    }
+
+    if (company_type) {
+      filter.companyType = company_type;
     }
 
     if (english_level) {
@@ -51,19 +72,125 @@ export class VacancyService {
       filter.employmentOptions = employment_options;
     }
 
-    console.log(filter);
+    // I use Promise.all() here because according to Prisma's documentation $transaction executes sequentially
+    // documentation: https://www.prisma.io/docs/concepts/components/prisma-client/transactions#about-transactions-in-prisma
+    // relative issue: https://github.com/prisma/prisma/issues/7550#issuecomment-1594572700
+    const [vacancies, count] = await Promise.all([
+      this.prismaService.vacancy.findMany({
+        where: filter,
+        select: {
+          favoriteVacancies: {
+            select: {
+              id: true,
+              candidateId: true,
+              vacancyId: true,
+            },
+          },
+          employer: {
+            select: {
+              id: true,
+              fullname: true,
+              positionAndCompany: true,
+              user: {
+                select: {
+                  avatar: true,
+                },
+              },
+            },
+          },
+          id: true,
+          name: true,
+          companyType: true,
+          createdAt: true,
+          responsesCount: true,
+          views: true,
+          country: true,
+          city: true,
+          employmentOptions: true,
+          experience: true,
+          english: true,
+          salaryForkGte: true,
+          salaryForkLte: true,
+          description: true,
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: [
+          {
+            experience: 'desc',
+          },
+          {
+            updatedAt: 'asc',
+          },
+        ],
+      }),
+      this.prismaService.vacancy.count({
+        where: filter,
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
 
-    return this.prismaService.vacancy.findMany({
-      where: filter,
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    return {
+      vacancies,
+      count,
+    };
   }
 
   async findOneById(id: string) {
     const { employer, ...rest } = await this.prismaService.vacancy.findUnique({
       where: {
         id,
+      },
+      include: {
+        keywords: true,
+        clarifiedData: true,
+        employer: {
+          select: {
+            id: true,
+            companyLink: true,
+            dou: true,
+            fullname: true,
+            positionAndCompany: true,
+            aboutCompany: true,
+            user: {
+              select: {
+                avatar: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!rest) throw new NotFoundException('This vacancy is not exists.');
+
+    return {
+      ...rest,
+      employer: {
+        id: employer.id,
+        companyLink: employer.companyLink,
+        aboutCompany: employer.aboutCompany,
+        dou: employer.dou,
+        fullname: employer.fullname,
+        positionAndCompany: employer.positionAndCompany,
+        avatar: employer.user[0].avatar,
+      },
+    };
+  }
+
+  async findOneByIdPublic(id: string) {
+    const vacancyExist = await this.checkVacancyExist(id);
+
+    if (!vacancyExist)
+      throw new NotFoundException('This vacancy is not exists.');
+
+    const { employer, ...rest } = await this.prismaService.vacancy.update({
+      where: {
+        id,
+      },
+      data: {
+        views: vacancyExist.views + 1,
       },
       include: {
         keywords: true,
