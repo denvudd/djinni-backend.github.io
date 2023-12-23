@@ -11,6 +11,7 @@ import { PrismaService } from 'src/prisma.service';
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { SkillCreateDto } from './dto/create-skill.dto';
 import { CadidatesListQueryDto } from './dto/candidates-list.dto';
+import { CandidateResumeDto } from './dto/add-resume.dto';
 
 @Injectable()
 export class CandidateService {
@@ -48,6 +49,7 @@ export class CandidateService {
         gte: salary_min,
         lte: salary_max,
       },
+      active: true,
       filled: true,
     };
 
@@ -136,6 +138,25 @@ export class CandidateService {
     return candidate;
   }
 
+  async getCandidateProfile(id: string) {
+    const candidate = await this.prisma.candidateUser.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        skills: true,
+        blockedDomains: true,
+        blockedTypes: true,
+        user: true,
+      },
+    });
+
+    if (!candidate)
+      throw new UnauthorizedException('This candidate is not exists.');
+
+    return candidate;
+  }
+
   async findOneByIdPublic(id: string) {
     const candidate = await this.prisma.candidateUser.findUnique({
       where: {
@@ -177,6 +198,14 @@ export class CandidateService {
 
   async getSkills(candidateId: string) {
     return await this.prisma.candidateSkill.findMany({
+      where: {
+        candidateId,
+      },
+    });
+  }
+
+  async getResume(candidateId: string) {
+    return await this.prisma.candidateResume.findMany({
       where: {
         candidateId,
       },
@@ -373,26 +402,131 @@ export class CandidateService {
     };
   }
 
-  async update(id: string, dto: CandidateUpdateDto) {
+  async deleteResume(id: string, resumeId: string) {
+    const resumeExist = await this.prisma.candidateResume.findFirst({
+      where: {
+        id: resumeId,
+      },
+    });
+
+    if (!resumeExist) throw new ConflictException('This resume does not exist');
+
+    const resume = await this.prisma.candidateResume.deleteMany({
+      where: {
+        id: resumeId,
+      },
+    });
+
+    return {
+      success: true,
+      ...resume,
+    };
+  }
+
+  async addResume(id: string, candidateResumeDto: CandidateResumeDto) {
+    const candidate = await this.checkCandidateExists(id);
+    const resumeCount = await this.prisma.candidateResume.count({
+      where: {
+        candidateId: id,
+      },
+    });
+
+    if (!candidate) throw new NotFoundException('Candidate is not exists.');
+    if (resumeCount === 3)
+      throw new BadRequestException('You can add only 3 resumes');
+
+    const resume = await this.prisma.candidateResume.create({
+      data: {
+        ...candidateResumeDto,
+        candidate: {
+          connect: {
+            id,
+          },
+        },
+      },
+    });
+
+    return resume;
+  }
+
+  async update(id: string, candidateUpdateDto: CandidateUpdateDto) {
     const candidate = await this.prisma.candidateUser.findFirst({
       where: {
         id,
+      },
+      include: {
+        blockedDomains: true,
+        blockedTypes: true,
       },
     });
 
     if (!candidate) throw new NotFoundException();
 
-    const result = await this.prisma.candidateUser.update({
-      where: {
-        id,
-      },
-      data: {
-        ...dto,
-      },
-    });
+    const { blockedDomains, blockedTypes, ...dto } = candidateUpdateDto;
 
-    return {
-      ...result,
-    };
+    let blockedDomainsToDelete: string[] | undefined;
+    let blockedTypesToDelete: string[] | undefined;
+
+    if (!!blockedDomains) {
+      const currentBlockedDomains = candidate.blockedDomains?.map(
+        (domain) => domain.name,
+      );
+
+      blockedDomainsToDelete =
+        currentBlockedDomains &&
+        currentBlockedDomains.filter(
+          (domain) => !blockedDomains.includes(domain),
+        );
+    }
+
+    if (!!blockedTypes) {
+      const currentBlockedTypes = candidate.blockedTypes?.map(
+        (type) => type.name,
+      );
+
+      blockedTypesToDelete =
+        currentBlockedTypes &&
+        currentBlockedTypes.filter((type) => !blockedTypes.includes(type));
+    }
+
+    if (!!blockedDomainsToDelete || !!blockedTypesToDelete) {
+      const result = await this.prisma.candidateUser.update({
+        where: {
+          id,
+        },
+        data: {
+          blockedDomains: {
+            deleteMany: blockedDomainsToDelete.map((name) => ({
+              name,
+            })),
+            create: blockedDomains.map((name) => ({
+              name,
+            })),
+          },
+          blockedTypes: {
+            deleteMany: blockedTypesToDelete.map((name) => ({
+              name,
+            })),
+            create: blockedTypes.map((name) => ({
+              name,
+            })),
+          },
+          ...dto,
+        },
+      });
+
+      return { ...result };
+    } else {
+      const result = await this.prisma.candidateUser.update({
+        where: {
+          id,
+        },
+        data: {
+          ...dto,
+        },
+      });
+
+      return { ...result };
+    }
   }
 }

@@ -30,6 +30,7 @@ model CandidateUser {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   views     Int?     @default(0)
+  active    Boolean  @default(true)
 
   userId String
   user   User[] @relation("CandidateToUser")
@@ -55,14 +56,13 @@ model CandidateUser {
   employmentOptions EmploymentOption    @default(Remote)
   communicateMethod CommunicateMethod   @default(Djinni)
 
-  skype      String?
-  phone      String?
-  telegram   String?
-  whatsApp   String?
-  linkedIn   String?
-  github     String?
-  portfolio  String?
-  resumeFile String?
+  skype     String?
+  phone     String?
+  telegram  String?
+  whatsApp  String?
+  linkedIn  String?
+  github    String?
+  portfolio String?
 
   blockedDomains     BlockedDomain[]      @relation("BlockedDomainToCandidate")
   blockedTypes       BlockedVacancyType[] @relation("BlockedVacancyTypeToCandidate")
@@ -71,6 +71,22 @@ model CandidateUser {
   refusals           OfferRefusal[]
   favoriteCandidates FavoriteCandidate[]
   favoriteVacancies  FavoriteVacancy[]
+  resumeFiles        CandidateResume[]
+}
+
+model CandidateResume {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String
+  resumeUrl String
+  isMain    Boolean @default(false)
+
+  candidateId String
+  candidate   CandidateUser @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId])
 }
 
 model CandidateSkill {

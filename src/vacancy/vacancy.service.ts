@@ -350,7 +350,6 @@ export class VacancyService {
       (data) => !currentClarifiedData.includes(data),
     );
 
-    // Обновите вакансию, подключая к ней только что созданные ключевые слова
     const updatedVacancy = await this.prismaService.vacancy.update({
       where: {
         id,
