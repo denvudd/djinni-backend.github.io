@@ -8,21 +8,21 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import { EmployerService } from './employer.service';
-import { VacancyService } from 'src/vacancy/vacancy.service';
-import { OfferService } from 'src/offer/offer.service';
+import { VacancyService } from '../vacancy/vacancy.service';
+import { OfferService } from '../offer/offer.service';
 
 import { UpdateEmployerDto } from './dto/update-employer.dto';
 import { AddFavoriteCandidateDto } from './dto/add-favorite-candidate.dto';
-import { CreateOfferDto } from 'src/offer/dto/create-offer.dto';
-import { MoveOfferToArchiveDto } from 'src/offer/dto/move-offer-to-archive.dto';
-import { ReplyOfferDto } from 'src/offer/dto/reply-offer.dto';
-import { RefuseOfferDto } from 'src/offer/dto/refuse-offer.dto';
-import { MoveOfferToFavoriteDto } from 'src/offer/dto/move-offer-to-favorite.dto';
+import { CreateOfferDto } from '../offer/dto/create-offer.dto';
+import { MoveOfferToArchiveDto } from '../offer/dto/move-offer-to-archive.dto';
+import { ReplyOfferDto } from '../offer/dto/reply-offer.dto';
+import { RefuseOfferDto } from '../offer/dto/refuse-offer.dto';
 import { CreateSubscribeDto } from './dto/create-subscribe.dto';
 import { CreateBillingDto } from './dto/create-billing.dto';
 import { UpdateBillingDto } from './dto/update-billing.dto';
+import { MoveOfferToFavoriteDto } from '../offer/dto/move-offer-to-favorite.dto';
 
 @Controller('employer')
 export class EmployerController {

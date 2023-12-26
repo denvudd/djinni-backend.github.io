@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { OfferController } from './offer.controller';
 import { OfferService } from './offer.service';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
 
 @Module({
   controllers: [OfferController],

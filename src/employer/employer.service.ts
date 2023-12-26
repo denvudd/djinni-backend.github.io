@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
 
 import { UpdateEmployerDto } from './dto/update-employer.dto';
 import { CreateSubscribeDto } from './dto/create-subscribe.dto';

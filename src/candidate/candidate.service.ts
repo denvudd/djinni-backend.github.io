@@ -6,7 +6,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
 
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { SkillCreateDto } from './dto/create-skill.dto';

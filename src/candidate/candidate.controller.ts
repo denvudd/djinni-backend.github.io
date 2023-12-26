@@ -9,8 +9,8 @@ import {
   Query,
   Delete,
 } from '@nestjs/common';
-import { JwtGuard } from 'src/auth/guards/jwt.guard';
-import { OfferService } from 'src/offer/offer.service';
+import { JwtGuard } from '../auth/guards/jwt.guard';
+import { OfferService } from '../offer/offer.service';
 import { CandidateService } from './candidate.service';
 
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
