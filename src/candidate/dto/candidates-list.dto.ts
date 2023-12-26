@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional } from 'class-validator';
 import { toLowerCase, toNumber } from '../../common/helper/cast.helper';
 import { ApiProperty } from '@nestjs/swagger/dist';
-import { EmploymentOption, EnglishLevel } from 'src/enums/candidate.enum';
+import { EmploymentOption, EnglishLevel } from '../../enums/candidate.enum';
 
 export class CadidatesListQueryDto {
   @ApiProperty({

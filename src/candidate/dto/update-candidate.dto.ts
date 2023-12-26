@@ -6,14 +6,13 @@ import {
   IsBoolean,
   MaxLength,
   IsArray,
-  IsObject,
 } from 'class-validator';
 import {
   CommunicateMethod,
   EmploymentOption,
   EnglishLevel,
   PreferableLanguage,
-} from 'src/enums/candidate.enum';
+} from '../../enums/candidate.enum';
 
 export class CandidateUpdateDto {
   @IsBoolean()

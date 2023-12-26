@@ -1,5 +1,5 @@
+import { RefusalReason } from '@prisma/client';
 import { IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
-import { RefusalReason } from 'src/enums/employer.enum';
 
 export class RefuseOfferDto {
   @IsString()

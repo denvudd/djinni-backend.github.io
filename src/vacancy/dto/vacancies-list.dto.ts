@@ -2,8 +2,8 @@ import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional } from 'class-validator';
 import { toLowerCase, toNumber } from '../../common/helper/cast.helper';
 import { ApiProperty } from '@nestjs/swagger/dist';
-import { EmploymentOption, EnglishLevel } from 'src/enums/candidate.enum';
-import { CompanyType } from '@prisma/client';
+import { CompanyType, EnglishLevel } from '@prisma/client';
+import { EmploymentOption } from '../../enums/candidate.enum';
 
 enum ExpRank {
   Junior = 'Junior',

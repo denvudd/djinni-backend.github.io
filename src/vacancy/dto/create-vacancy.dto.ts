@@ -1,3 +1,4 @@
+import { EmploymentOption, EnglishLevel } from '@prisma/client';
 import {
   IsArray,
   IsBoolean,
@@ -8,7 +9,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { EmploymentOption, EnglishLevel } from 'src/enums/candidate.enum';
 
 enum CompanyType {
   None = 'None',
