@@ -18,6 +18,7 @@ import { SkillCreateDto } from './dto/create-skill.dto';
 import { CadidatesListQueryDto } from './dto/candidates-list.dto';
 import { AddFavoriteVacancyDto } from './dto/add-favorite-vacancy.dto';
 import { CandidateResumeDto } from './dto/add-resume.dto';
+import { UpdateIsMainDto } from './dto/update-is-main.dto';
 
 @Controller('candidate')
 export class CandidateController {
@@ -94,6 +95,16 @@ export class CandidateController {
       id,
       addFavoriteVacancyDto.vacancyId,
     );
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch(':id/resume/:resumeId/main')
+  updateIsMain(
+    @Param('id') id: string,
+    @Param('resumeId') resumeId: string,
+    @Body() updateIsMainDto: UpdateIsMainDto,
+  ) {
+    return this.candidateService.updateIsMain(id, resumeId, updateIsMainDto);
   }
 
   @UseGuards(JwtGuard)

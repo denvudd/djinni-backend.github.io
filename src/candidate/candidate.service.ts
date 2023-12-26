@@ -12,6 +12,7 @@ import { CandidateUpdateDto } from './dto/update-candidate.dto';
 import { SkillCreateDto } from './dto/create-skill.dto';
 import { CadidatesListQueryDto } from './dto/candidates-list.dto';
 import { CandidateResumeDto } from './dto/add-resume.dto';
+import { UpdateIsMainDto } from './dto/update-is-main.dto';
 
 @Injectable()
 export class CandidateService {
@@ -208,6 +209,9 @@ export class CandidateService {
     return await this.prisma.candidateResume.findMany({
       where: {
         candidateId,
+      },
+      orderBy: {
+        isMain: 'desc',
       },
     });
   }
@@ -447,6 +451,45 @@ export class CandidateService {
     });
 
     return resume;
+  }
+
+  async updateIsMain(
+    candidateId: string,
+    resumeId: string,
+    { isMain }: UpdateIsMainDto,
+  ) {
+    const resume = await this.prisma.candidateResume.findUnique({
+      where: {
+        id: resumeId,
+        candidateId,
+      },
+    });
+
+    if (!resume) throw new NotFoundException('Resume is not exists.');
+
+    const updateAllResume = await this.prisma.candidateResume.updateMany({
+      where: {
+        candidateId,
+      },
+      data: {
+        isMain: false,
+      },
+    });
+
+    const updatedTargetResume = await this.prisma.candidateResume.update({
+      where: {
+        id: resumeId,
+        candidateId,
+      },
+      data: {
+        isMain,
+      },
+    });
+
+    return {
+      success: true,
+      ...updatedTargetResume,
+    };
   }
 
   async update(id: string, candidateUpdateDto: CandidateUpdateDto) {
