@@ -14,6 +14,7 @@ import { OfferModule } from './offer/offer.module';
 
 import { AppService } from './app.service';
 import { PrismaService } from './prisma.service';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PrismaService } from './prisma.service';
     OfferModule,
     EmployerModule,
     CountriesModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
