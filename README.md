@@ -1,3 +1,8 @@
+> [!WARNING]  
+> This project is still in development and is not ready for production use. 
+> Also, it's free deployed on [Cyclic](https://www.cyclic.sh/) so it can delay requests, especially in a cold one.
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
