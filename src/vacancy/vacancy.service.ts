@@ -4,6 +4,7 @@ import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import { VacanciesListQueryDto } from './dto/vacancies-list.dto';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
+import { VacanciesByProfileQueryDto } from './dto/vacancies-by-profile.dto';
 
 @Injectable()
 export class VacancyService {
@@ -15,6 +16,123 @@ export class VacancyService {
         id,
       },
     });
+  }
+
+  async getListOfVacanciesByProfile(
+    candidateId: string,
+    queryParams: VacanciesByProfileQueryDto,
+  ) {
+    const { limit, page } = queryParams;
+    const candidate = await this.prismaService.candidateUser.findUnique({
+      where: {
+        id: candidateId,
+      },
+      select: {
+        category: true,
+        experience: true,
+        expectations: true,
+        blockedDomains: true,
+        blockedTypes: true,
+      },
+    });
+
+    if (!candidate) throw new NotFoundException('Candidate not found');
+
+    const filter: Prisma.VacancyWhereInput = {
+      category: candidate.category,
+      experience: {
+        gte: candidate.experience >= 3 ? 3 : 0, // if candidate have 3 years of experience or more then show vacancies with 3 years of experience or more if not then show vacancies with 0 years of experience
+        lte: candidate.experience + 1,
+      },
+      privateSalaryForkGte: {
+        gte: candidate.expectations,
+      },
+      OR: [
+        {
+          name: { contains: candidate.category },
+          description: { contains: candidate.category },
+        },
+      ],
+      NOT: {
+        domain: {
+          // if vacancy have at least one blocked domain then exclude vacancies with this domain
+          in: candidate.blockedDomains.map((domain) => domain.name),
+        },
+        companyType: {
+          // if vacancy have at least one blocked type then exclude vacancies with this type
+          in: candidate.blockedTypes.map((type) => type.name),
+        },
+      },
+      active: true,
+    };
+
+    // I use Promise.all() here because according to Prisma's documentation $transaction executes sequentially
+    // documentation: https://www.prisma.io/docs/concepts/components/prisma-client/transactions#about-transactions-in-prisma
+    // relative issue: https://github.com/prisma/prisma/issues/7550#issuecomment-1594572700
+    const [vacancies, count] = await Promise.all([
+      this.prismaService.vacancy.findMany({
+        where: filter,
+        select: {
+          favoriteVacancies: {
+            select: {
+              id: true,
+              candidateId: true,
+              vacancyId: true,
+            },
+          },
+          employer: {
+            select: {
+              id: true,
+              fullname: true,
+              positionAndCompany: true,
+              user: {
+                select: {
+                  avatar: true,
+                },
+              },
+            },
+          },
+          id: true,
+          name: true,
+          companyType: true,
+          createdAt: true,
+          responsesCount: true,
+          views: true,
+          country: true,
+          city: true,
+          domain: true,
+          employmentOptions: true,
+          experience: true,
+          english: true,
+          salaryForkGte: true,
+          salaryForkLte: true,
+          description: true,
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: [
+          {
+            experience: 'asc',
+          },
+          {
+            updatedAt: 'asc',
+          },
+          {
+            views: 'asc',
+          },
+        ],
+      }),
+      this.prismaService.vacancy.count({
+        where: filter,
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      vacancies,
+      count,
+    };
   }
 
   async getListOfVacancies(queryParams: VacanciesListQueryDto) {

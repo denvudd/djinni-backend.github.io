@@ -5,7 +5,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { CompanyType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 
 import { CandidateUpdateDto } from './dto/update-candidate.dto';
@@ -547,7 +547,7 @@ export class CandidateService {
             })),
           },
           blockedTypes: {
-            deleteMany: blockedTypesToDelete.map((name) => ({
+            deleteMany: blockedTypesToDelete.map((name: CompanyType) => ({
               name,
             })),
             create: blockedTypes.map((name) => ({

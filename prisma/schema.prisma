@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
@@ -323,8 +323,8 @@ model BlockedDomain {
 }
 
 model BlockedVacancyType {
-  id   String @id @default(cuid())
-  name String
+  id   String      @id @default(cuid())
+  name CompanyType @default(None)
 
   candidateId String?
   candidate   CandidateUser? @relation("BlockedVacancyTypeToCandidate", fields: [candidateId], references: [id])

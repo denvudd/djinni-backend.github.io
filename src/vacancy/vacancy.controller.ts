@@ -7,10 +7,23 @@ import { VacancyService } from './vacancy.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import { VacanciesListQueryDto } from './dto/vacancies-list.dto';
+import { VacanciesByProfileQueryDto } from './dto/vacancies-by-profile.dto';
 
 @Controller('vacancies')
 export class VacancyController {
   constructor(private readonly vacancyService: VacancyService) {}
+
+  @UseGuards(JwtGuard)
+  @Get('list/:candidateId')
+  findAllByProfile(
+    @Param('candidateId') candidateId: string,
+    @Query() queryParams: VacanciesByProfileQueryDto,
+  ) {
+    return this.vacancyService.getListOfVacanciesByProfile(
+      candidateId,
+      queryParams,
+    );
+  }
 
   @Get('list')
   findAll(@Query() queryParams: VacanciesListQueryDto) {
